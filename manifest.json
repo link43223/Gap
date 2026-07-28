@@ -1,0 +1,22 @@
+{
+    "name": "Gap - 英语阅读",
+    "short_name": "Gap",
+    "description": "通过阅读学英语，点按查词，智能单词库",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#f5f5f7",
+    "theme_color": "#0071e3",
+    "orientation": "portrait",
+    "icons": [
+        {
+            "src": "icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

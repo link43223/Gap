@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Gap - 英语阅读</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Gap">
+    <meta name="theme-color" content="#f5f5f7">
+    <link rel="manifest" href="/manifest.json">
+    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500&family=Inter:wght@400&family=Libre+Baskerville&family=Lora:wght@500&family=Merriweather:wght@400&family=Nunito:wght@400&family=Open+Sans&family=Poppins:wght@400&family=Raleway:wght@400&family=Rubik:wght@400&family=Space+Mono&family=Spectral:wght@400&family=Ubuntu:wght@400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>Gap</h1>
+        <div class="header-right">
+            <button class="icon-btn bookmark-header-btn" onclick="menuAction('bookmarks')" title="收藏">★</button>
+            <div class="dropdown-wrapper">
+                <button class="icon-btn" onclick="toggleSettings()" title="排版">⚙</button>
+                <div id="settingsDropdown" class="dropdown settings-dropdown">
+                    <div id="textSettingsGroup" style="display:none;">
+                    <div class="setting-row">
+                        <span>字号</span>
+                        <div class="setting-controls">
+                            <button class="adj-btn" onclick="changeFontSize(-1)">A⁻</button>
+                            <span id="fontSizeLabel" class="adj-label">标准</span>
+                            <button class="adj-btn" onclick="changeFontSize(1)">A⁺</button>
+                        </div>
+                    </div>
+                    <div class="setting-row">
+                        <span>行距</span>
+                        <div class="setting-controls">
+                            <button class="adj-btn" onclick="changeLineHeight(-1)">−</button>
+                            <span id="lineHeightLabel" class="adj-label">标准</span>
+                            <button class="adj-btn" onclick="changeLineHeight(1)">+</button>
+                        </div>
+                    </div>
+                    <div class="setting-row">
+                        <span>对齐</span>
+                        <select id="alignSelect" onchange="changeAlign()" style="padding:6px 10px;border:1px solid #d2d2d7;border-radius:8px;font-size:13px;">
+                            <option value="left">左对齐</option>
+                            <option value="justify">两端对齐</option>
+                        </select>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="setting-row" style="position:relative;">
+                        <span>字体</span>
+                        <div class="custom-select" id="fontSelectWrap" onclick="toggleFontPicker()">
+                            <span id="fontSelectLabel">系统默认</span>
+                            <span style="font-size:10px;color:#8e8e93;">▼</span>
+                        </div>
+                        <div id="fontPicker" class="font-picker">
+                            <div class="font-option" data-font="default" onclick="selectFont('default','System Default')">System Default</div>
+                            <div class="font-option" data-font="Merriweather" onclick="selectFont('Merriweather','Merriweather')" style="font-family:Merriweather">Merriweather</div>
+                            <div class="font-option" data-font="Lora" onclick="selectFont('Lora','Lora')" style="font-family:Lora">Lora</div>
+                            <div class="font-option" data-font="EB Garamond" onclick="selectFont('EB Garamond','EB Garamond')" style="font-family:'EB Garamond'">EB Garamond</div>
+                            <div class="font-option" data-font="Libre Baskerville" onclick="selectFont('Libre Baskerville','Libre Baskerville')" style="font-family:'Libre Baskerville'">Libre Baskerville</div>
+                            <div class="font-option" data-font="Spectral" onclick="selectFont('Spectral','Spectral')" style="font-family:Spectral">Spectral</div>
+                            <div class="font-option" data-font="Poppins" onclick="selectFont('Poppins','Poppins')" style="font-family:Poppins">Poppins</div>
+                            <div class="font-option" data-font="Inter" onclick="selectFont('Inter','Inter')" style="font-family:Inter">Inter</div>
+                            <div class="font-option" data-font="Open Sans" onclick="selectFont('Open Sans','Open Sans')" style="font-family:'Open Sans'">Open Sans</div>
+                            <div class="font-option" data-font="Ubuntu" onclick="selectFont('Ubuntu','Ubuntu')" style="font-family:Ubuntu">Ubuntu</div>
+                            <div class="font-option" data-font="Rubik" onclick="selectFont('Rubik','Rubik')" style="font-family:Rubik">Rubik</div>
+                            <div class="font-option" data-font="Nunito" onclick="selectFont('Nunito','Nunito')" style="font-family:Nunito">Nunito</div>
+                            <div class="font-option" data-font="Raleway" onclick="selectFont('Raleway','Raleway')" style="font-family:Raleway">Raleway</div>
+                            <div class="font-option" data-font="Space Mono" onclick="selectFont('Space Mono','Space Mono')" style="font-family:'Space Mono'">Space Mono</div>
+                        </div>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-setting" style="padding-bottom:4px;">主题色彩</div>
+                    <div id="colorPalette" class="color-palette"></div>
+                    <div class="setting-row">
+                        <span>夜间模式</span>
+                        <label class="toggle-switch"><input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode()"><span class="toggle-slider"></span></label>
+                    </div>
+                </div>
+            </div>
+            <div class="dropdown-wrapper">
+                <button class="icon-btn hamburger-btn" onclick="toggleDropdown()" title="菜单">☰</button>
+                <div id="dropdown" class="dropdown">
+                    <button class="dropdown-item" onclick="menuAction('read')">📖 阅读</button>
+                    <button class="dropdown-item" onclick="menuAction('wordbank')">📝 单词库</button>
+                    <button class="dropdown-item" onclick="menuAction('bookmarks')">⭐ 收藏文章</button>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-setting">
+                        <span>英文释义</span>
+                        <label class="toggle-switch"><input type="checkbox" id="showEnToggle" checked onchange="toggleShowEn()"><span class="toggle-slider"></span></label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div id="topic-bar">
+        <span class="topic-label">话题</span>
+        <button class="topic-btn active" onclick="selectTopic('science')">科学科技</button>
+        <button class="topic-btn" onclick="selectTopic('health')">健康</button>
+        <button class="topic-btn" onclick="selectTopic('life')">生活</button>
+        <button class="topic-btn" onclick="selectTopic('culture')">文化</button>
+        <button class="topic-btn" onclick="selectTopic('nature')">自然</button>
+    </div>
+
+    <!-- 阅读面板：列表 + 详情 -->
+    <div id="read-panel" class="panel">
+        <div id="articleListView">
+            <div id="articleList" class="article-list"></div>
+        </div>
+        <div id="articleDetailView" style="display:none;">
+            <button class="back-btn" onclick="backToList()">← 返回列表</button>
+            <div class="article-card">
+                <div class="article-title-row">
+                    <h2 id="articleTitle"></h2>
+                    <button id="bookmarkBtn" class="icon-btn bookmark-article-btn" onclick="toggleBookmark()" title="收藏">☆</button>
+                </div>
+                <p id="articleSource" class="article-source"></p>
+                <div id="articleContent" class="article-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="wordbank-panel" class="panel" style="display:none;">
+        <div class="panel-header"><h2>我的单词库</h2><button class="text-btn" onclick="exportWords()">导出</button></div>
+        <div id="wordList" class="word-list"></div>
+        <div id="emptyHint" class="empty-hint">还没有单词</div>
+    </div>
+
+    <div id="bookmarks-panel" class="panel" style="display:none;">
+        <div class="panel-header"><h2>收藏文章</h2></div>
+        <div id="bookmarkList" class="word-list"></div>
+        <div id="bmEmptyHint" class="empty-hint">还没有收藏</div>
+    </div>
+
+    <div id="wordPopup" class="word-popup">
+        <div class="popup-header"><strong id="popupWord"></strong><button class="icon-btn close-btn" onclick="closePopup()">×</button></div>
+        <div id="popupMeaning"></div>
+        <div class="popup-actions">
+            <button id="saveWordBtn" class="action-btn" onclick="saveWord()">+ 加入单词库</button>
+            <button id="transSentBtn" class="action-btn secondary" onclick="translateSentence()">翻译整句</button>
+        </div>
+    </div>
+    <div id="overlay" class="overlay" style="display:none;" onclick="closePopup()"></div>
+
+</div>
+
+<script>if("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js");</script>
+<script src="articles.js"></script>
+<script src="dict-zh.js"></script>
+<script src="phonetic.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
