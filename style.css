@@ -999,8 +999,13 @@ body.dark .nav-item.active { color: #4da3ff; }
     font-size: 16px; font-weight: 600; cursor: pointer; font-family: inherit;
 }
 .review-next-btn:active { opacity: 0.8; }
-.review-start { text-align: center; padding: 40px 20px 80px; display: flex; flex-direction: column; align-items: center; gap: 24px; }
-.review-start-title { font-size: 22px; font-weight: 700; color: #1a1a2e; }
+.review-start { display: flex; flex-direction: column; height: calc(100vh - 60px); padding: 40px 24px 80px; text-align: center; }
+.review-start-title { font-size: 22px; font-weight: 700; color: #1a1a2e; margin-bottom: 24px; }
+.review-start-settings { display: flex; gap: 10px; justify-content: center; margin-bottom: 24px; position: relative; z-index: 10; }
+#reviewSourceWrap, #reviewCountWrap { position: relative; }
+#reviewSourcePicker { position: absolute; bottom: 100%; left: 0; margin-bottom: 4px; width: 130px; z-index: 200; }
+#reviewCountPicker { position: absolute; bottom: 100%; left: 0; margin-bottom: 4px; width: 80px; z-index: 200; }
+.review-start-btns { display: flex; gap: 16px; width: 100%; max-width: 360px; margin: auto auto 0; }
 .review-settings { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
 .review-settings select { padding: 10px 16px; border: 1px solid #e5e5ea; border-radius: 12px; font-size: 14px; font-family: inherit; background: white; color: #333; cursor: pointer; }
 .review-start-btn { padding: 14px 40px; border: none; border-radius: 14px; background: var(--accent); color: white; font-size: 16px; font-weight: 600; cursor: pointer; font-family: inherit; }
