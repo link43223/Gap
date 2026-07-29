@@ -1032,6 +1032,7 @@ function checkReviewAnswer(el) {
         el.classList.add("wrong");
         document.getElementById("reviewFeedback").innerHTML = '<span>正确答案：' + REVIEW_WORDS[REVIEW_IDX].meaning + '</span>';
         document.querySelectorAll(".review-option").forEach(function(o) { if (o.getAttribute("data-correct") === "true") o.classList.add("correct"); });
+        addWrongWord(REVIEW_WORDS[REVIEW_IDX].word);
     }
     document.getElementById("reviewNextBtn").style.display = "block";
 }
@@ -1059,6 +1060,32 @@ function showReviewResult() {
     document.getElementById("reviewResult").innerHTML = html;
 }
 
-function closeReview() {
-    showTab("read");
+function closeReview() { showTab("read"); }
+function openReviewSettings() { document.getElementById("reviewSettingsPanel").style.display = "block"; }
+function closeReviewSettings() { document.getElementById("reviewSettingsPanel").style.display = "none"; }
+function openReviewStudy() { startReview(); }
+function openReviewWrong() {
+    var wrong = getWrongWords();
+    if (!wrong.length) { alert("还没有错词记录，先背单词吧！"); return; }
+    REVIEW_WORDS = [];
+    for (var i = 0; i < wrong.length; i++) {
+        var meaning = ZH_DICT && ZH_DICT[wrong[i]] || getBasicMeaning(wrong[i]);
+        REVIEW_WORDS.push({ word: wrong[i], meaning: meaning || "" });
+    }
+    REVIEW_IDX = 0; REVIEW_SCORE = 0; REVIEW_TOTAL = 0; REVIEW_CORRECT = [];
+    document.getElementById("reviewStart").style.display = "none";
+    document.getElementById("reviewResult").style.display = "none";
+    document.getElementById("reviewQuiz").style.display = "block";
+    renderReviewQuestion();
+}
+function getWrongWords() { try { return JSON.parse(localStorage.getItem("gap_wrong_words") || "[]"); } catch(e) { return []; } }
+function addWrongWord(word) { var wrong = getWrongWords(); if (wrong.indexOf(word) === -1) wrong.push(word); localStorage.setItem("gap_wrong_words", JSON.stringify(wrong)); }
+function getBasicMeaning(word) {
+    if (!window.ZH_DICT) return "";
+    if (ZH_DICT[word]) return ZH_DICT[word];
+    var lower = word.toLowerCase();
+    if (lower.endsWith("ing")) { var b = lower.slice(0,-3); if (ZH_DICT[b]) return ZH_DICT[b]; }
+    if (lower.endsWith("ed")) { var b = lower.slice(0,-2); if (ZH_DICT[b]) return ZH_DICT[b]; }
+    if (lower.endsWith("s") && !lower.endsWith("ss")) { var b = lower.slice(0,-1); if (ZH_DICT[b]) return ZH_DICT[b]; }
+    return "";
 }
