@@ -908,13 +908,10 @@ body.dark .nav-arrow { background: #333; color: #4da3ff; border-color: #444; }
 .review-start-settings { display: flex; gap: 10px; margin-bottom: 24px; }
 .review-start-settings select { padding: 8px 14px; border: 1px solid #e5e5ea; border-radius: 10px; font-size: 14px; font-family: inherit; background: white; color: #333; cursor: pointer; }
 .review-start-btns { display: flex; gap: 16px; width: 100%; max-width: 340px; position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); padding: 0 16px; }
-.review-start-btn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 20px 16px; border: none; border-radius: 16px; cursor: pointer; font-family: inherit; transition: transform 0.15s; }
+.review-start-btn { flex: 1; padding: 16px; border: none; border-radius: 14px; cursor: pointer; font-family: inherit; font-size: 16px; font-weight: 600; text-align: center; transition: transform 0.15s; }
 .review-start-btn:active { transform: scale(0.95); }
 .review-start-btn.primary { background: var(--accent); color: white; }
 .review-start-btn.secondary { background: white; color: var(--accent); border: 1.5px solid var(--accent); }
-.review-start-btn .rsb-icon { font-size: 28px; }
-.review-start-btn .rsb-label { font-size: 17px; font-weight: 700; }
-.review-start-btn .rsb-desc { font-size: 12px; opacity: 0.7; }
 .review-settings-panel { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-radius: 20px 20px 0 0; padding: 20px 24px 32px; box-shadow: 0 -4px 24px rgba(0,0,0,0.1); z-index: 100; }
 .review-settings-title { font-size: 18px; font-weight: 700; color: #1a1a2e; text-align: center; margin-bottom: 20px; }
 .review-settings-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #f0f0f5; font-size: 15px; color: #3a3a3c; }
