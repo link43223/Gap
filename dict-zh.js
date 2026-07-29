@@ -5585,8 +5585,7 @@ var ZH_DICT = {
     "undertaken": "adj. 被承担的",
     "withdrawn": "adj. 孤僻的",
     "sunken": "adj. 沉没的",
-    "drunken": "adj. 醉酒的"
-
+    "drunken": "adj. 醉酒的",
     "cells": "n. 细胞",
     "kilometers": "n. 公里",
     "called": "v. 称为",

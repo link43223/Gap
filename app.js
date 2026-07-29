@@ -720,7 +720,13 @@ async function lookupChinese(word) {
 }
 
 async function fetchDictAPI(word) {
-    try { var r = await fetch("https://api.dictionaryapi.dev/api/v2/entries/en/" + encodeURIComponent(word)); return r.ok ? await r.json() : null; } catch(e) { return null; }
+    try {
+        var controller = new AbortController();
+        var timer = setTimeout(function() { controller.abort(); }, 5000);
+        var r = await fetch("https://api.dictionaryapi.dev/api/v2/entries/en/" + encodeURIComponent(word), { signal: controller.signal });
+        clearTimeout(timer);
+        return r.ok ? await r.json() : null;
+    } catch(e) { return null; }
 }
 
 // ==========================================
