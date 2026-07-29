@@ -219,7 +219,25 @@
             </select>
         </div>
         <button class="review-settings-close" onclick="closeReviewSettings()">完成</button>
-    </div><div id="wordPopup" class="word-popup">
+    </div>
+
+    <!-- 底部导航栏 -->
+    <div class="bottom-nav">
+        <button class="nav-item active" onclick="switchTab('read')">
+            <svg class="nav-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            <span class="nav-label">阅读</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('daily')">
+            <svg class="nav-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <span class="nav-label">每日精选</span>
+        </button>
+        <button class="nav-item" onclick="switchTab('review')">
+            <svg class="nav-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+            <span class="nav-label">背单词</span>
+        </button>
+    </div>
+
+    <div id="wordPopup" class="word-popup">
         <div class="popup-header"><strong id="popupWord"></strong><button class="icon-btn close-btn" onclick="closePopup()">×</button></div>
         <div id="popupMeaning"></div>
         <div class="popup-actions">
