@@ -897,10 +897,10 @@ body.dark .article-title-row h2 { color: #e5e5ea; }
 body.dark .nav-arrow { background: #333; color: #4da3ff; border-color: #444; }
 
 /* === 背单词 === */
-#review-panel { padding: 0 !important; }
+#review-panel { padding: 0 !important; margin: -12px -16px 0; }
 .review-area {
-    min-height: 100vh; display: flex; flex-direction: column;
-    background: #f5f5f7; padding: 40px 24px 80px;
+    height: calc(100vh - 60px); display: flex; flex-direction: column;
+    background: #f5f5f7; padding: 40px 24px;
 }
 .review-top {
     display: flex; gap: 20px; align-items: center;
