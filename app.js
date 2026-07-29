@@ -428,6 +428,29 @@ function makeWordsClickable(container, text) {
     var tokens = text.split(/(\s+)/);
     tokens.forEach(function(token) {
         if (/^\s+$/.test(token)) { container.appendChild(document.createTextNode(token)); return; }
+        // 行内图片标记 [image:URL|图注]
+        var imgMatch = token.match(/^\[image:([^\]]+)\]$/);
+        if (imgMatch) {
+            var parts = imgMatch[1].split("|");
+            var imgUrl = parts[0], imgCap = parts.length > 1 ? parts[1] : "";
+            var wrapper = document.createElement("div");
+            wrapper.className = "inline-image-wrap";
+            var img = document.createElement("img");
+            img.className = "inline-article-image";
+            img.src = imgUrl;
+            img.alt = imgCap || "";
+            img.loading = "lazy";
+            img.onerror = function() { wrapper.style.display = "none"; };
+            wrapper.appendChild(img);
+            if (imgCap) {
+                var cap = document.createElement("p");
+                cap.className = "inline-image-caption";
+                cap.textContent = imgCap;
+                wrapper.appendChild(cap);
+            }
+            container.appendChild(wrapper);
+            return;
+        }
         var match = token.match(/^([a-zA-Z]+)([\.,;:!\?\)\]\"\']*)$/);
         if (match) {
             var word = match[1], punct = match[2];
