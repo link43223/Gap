@@ -452,6 +452,23 @@ function loadArticle(key) {
     var src = article.source || "";
     if (src.indexOf("Wikipedia") === 0) src = "Wikipedia";
     document.getElementById("articleSource").textContent = src ? "来源：" + src : "";
+    // 图片
+    var imgEl = document.getElementById("articleImage");
+    var capEl = document.getElementById("articleImageCaption");
+    if (article.image) {
+        imgEl.src = article.image;
+        imgEl.alt = article.title;
+        imgEl.style.display = "block";
+        if (article.imageCaption) {
+            capEl.textContent = article.imageCaption;
+            capEl.style.display = "block";
+        } else {
+            capEl.style.display = "none";
+        }
+    } else {
+        imgEl.style.display = "none";
+        capEl.style.display = "none";
+    }
     makeWordsClickable(document.getElementById("articleContent"), article.text);
     applyDisplaySettings();
     updateBookmarkBtn();
