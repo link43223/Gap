@@ -901,11 +901,8 @@ body.dark .nav-arrow { background: #333; color: #4da3ff; border-color: #444; }
 .review-top-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 10; display: flex; justify-content: space-between; padding: 12px 16px; }
 .review-top-bar button { width: 36px; height: 36px; border: none; border-radius: 50%; background: rgba(0,0,0,0.08); color: #666; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .review-area { min-height: 100vh; display: flex; flex-direction: column; background: #f5f5f7; padding: 60px 16px 24px; }
-.review-start { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 24px 80px; }
-.review-start-icon { font-size: 48px; margin-bottom: 12px; }
-.review-start-title { font-size: 24px; font-weight: 700; color: #1a1a2e; margin-bottom: 6px; }
-.review-start-sub { font-size: 14px; color: #aeaeb2; margin-bottom: 20px; }
-.review-start-settings { display: flex; gap: 10px; margin-bottom: 24px; }
+.review-start { flex: 1; display: flex; flex-direction: column; padding: 80px 24px 40px; }
+.review-start-settings { display: flex; gap: 10px; justify-content: center; margin-bottom: 24px; }
 .review-start-settings select { padding: 8px 14px; border: 1px solid #e5e5ea; border-radius: 10px; font-size: 14px; font-family: inherit; background: white; color: #333; cursor: pointer; }
 .review-start-btns { display: flex; gap: 16px; width: 100%; max-width: 340px; position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); padding: 0 16px; }
 .review-start-btn { flex: 1; padding: 16px; border: none; border-radius: 14px; cursor: pointer; font-family: inherit; font-size: 16px; font-weight: 600; text-align: center; transition: transform 0.15s; }
@@ -949,7 +946,6 @@ body.dark .review-option { background: #1e1e35; color: #ccc; }
 body.dark .review-option .review-opt-label { background: #333; color: #999; }
 body.dark .review-option.correct { background: #1a3a1a; border-color: #4caf50; }
 body.dark .review-option.wrong { background: #3a1a1a; border-color: #ff3b30; }
-body.dark .review-start-title { color: #e5e5ea; }
 body.dark .review-start-btn.secondary { background: #252540; color: #4da3ff; border-color: #4da3ff; }
 body.dark .review-start-settings select { background: #252540; color: #ccc; border-color: #444; }
 body.dark .review-result { background: #1a1a2e; }
