@@ -108,6 +108,14 @@
     <!-- 阅读面板：列表 + 详情 -->
     <div id="read-panel" class="panel">
         <div id="articleListView">
+            <div id="searchBar" style="margin-bottom:12px;display:flex;align-items:center;gap:8px;background:white;border-radius:14px;padding:4px 12px;box-shadow:0 1px 3px rgba(0,0,0,0.05);transition:all 0.2s;">
+                <span style="font-size:16px;color:#aeaeb2;">🔍</span>
+                <input type="search" id="searchInput" placeholder="搜索文章标题或内容…"
+                       oninput="handleSearch(this.value)"
+                       style="width:100%;padding:10px 4px;border:none;border-radius:12px;font-size:15px;font-family:inherit;background:transparent;outline:none;">
+                <button id="searchClearBtn" onclick="clearSearch()"
+                        style="display:none;border:none;background:none;cursor:pointer;font-size:18px;color:#aeaeb2;padding:4px;">✕</button>
+            </div>
             <div id="articleList" class="article-list"></div>
         </div>
         <div id="articleDetailView" style="display:none;">

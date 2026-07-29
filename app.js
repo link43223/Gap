@@ -466,6 +466,74 @@ function getTopicArticles(topic) {
 }
 
 // ==========================================
+// 文章搜索
+// ==========================================
+var _searchActive = false;
+
+function handleSearch(query) {
+    var q = query.trim();
+    var clearBtn = document.getElementById("searchClearBtn");
+    if (q.length === 0) {
+        clearBtn.style.display = "none";
+        if (_searchActive) {
+            _searchActive = false;
+            showArticleList(currentTopic);
+        }
+        return;
+    }
+    clearBtn.style.display = "inline-block";
+    _searchActive = true;
+    renderSearchResults(searchArticles(q));
+}
+
+function clearSearch() {
+    document.getElementById("searchInput").value = "";
+    handleSearch("");
+    document.getElementById("searchInput").focus();
+}
+
+function searchArticles(query) {
+    var q = query.toLowerCase();
+    var results = [];
+    var TOPIC_NAMES = { "science": "科学科技", "health": "健康", "life": "生活", "culture": "文化", "nature": "自然" };
+    for (var key in articles) {
+        var a = articles[key];
+        var inTitle = a.title.toLowerCase().indexOf(q) !== -1;
+        var inText = a.text.toLowerCase().indexOf(q) !== -1;
+        if (inTitle || inText) {
+            var topicKey = key.split("-")[0];
+            results.push({
+                key: key,
+                title: a.title,
+                text: a.text,
+                source: a.source || "",
+                topic: TOPIC_NAMES[topicKey] || "",
+                score: inTitle ? 2 : 1
+            });
+        }
+    }
+    results.sort(function(a, b) { return b.score - a.score; });
+    return results;
+}
+
+function renderSearchResults(results) {
+    var listDiv = document.getElementById("articleList");
+    if (results.length === 0) {
+        listDiv.innerHTML = '<div class="empty-hint" style="padding:48px 0;text-align:center;color:#aeaeb2;">没有找到匹配的文章</div>';
+        return;
+    }
+    listDiv.innerHTML = results.map(function(r) {
+        var preview = r.text.replace(/\. /g, ". ").split(". ").slice(0, 2).join(". ") + ".";
+        if (preview.length > 150) preview = preview.slice(0, 150) + "...";
+        return '<div class="article-list-item" onclick="openArticle(\'' + r.key + '\')">' +
+            '<div class="ali-title">' + r.title + '</div>' +
+            '<div class="ali-preview">' + preview + '</div>' +
+            (r.topic ? '<div class="ali-source">话题：' + r.topic + '</div>' : '') +
+            '</div>';
+    }).join("");
+}
+
+// ==========================================
 // 查词
 // ==========================================
 async function lookupWord(word, element) {
