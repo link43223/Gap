@@ -1080,6 +1080,11 @@ function showReviewResult() {
     document.getElementById("reviewResult").innerHTML = html;
 }
 
+function backToReviewStart() {
+    document.getElementById("reviewQuiz").style.display = "none";
+    document.getElementById("reviewResult").style.display = "none";
+    document.getElementById("reviewStart").style.display = "flex";
+}
 function closeReview() { showTab("read"); }
 function openReviewSettings() { document.getElementById("reviewSettingsPanel").style.display = "block"; }
 function closeReviewSettings() { document.getElementById("reviewSettingsPanel").style.display = "none"; }
