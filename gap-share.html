@@ -276,21 +276,17 @@ body.dark .topic-label {
 
 /* === 文章详情过渡动画 === */
 #articleDetailView {
-    animation: articleSlideUp 0.35s cubic-bezier(0.22, 0.61, 0.36, 1);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
 }
-
-@keyframes articleSlideUp {
-    from { transform: translateY(40px); opacity: 0; }
-    to   { transform: translateY(0); opacity: 1; }
+#articleDetailView.show {
+    opacity: 1;
+    transform: translateY(0);
 }
-
-@keyframes articleSlideDown {
-    from { transform: translateY(0); opacity: 1; }
-    to   { transform: translateY(40px); opacity: 0; }
-}
-
 #articleDetailView.slide-out {
-    animation: articleSlideDown 0.25s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+    opacity: 0;
+    transform: translateY(20px);
 }
 
 /* === 文章 === */

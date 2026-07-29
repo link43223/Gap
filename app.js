@@ -454,6 +454,11 @@ function loadArticle(key) {
     if (!article) return;
     currentArticleKey = key;
     currentTopic = key.split("-")[0];
+    var detailView = document.getElementById("articleDetailView");
+    detailView.classList.remove("show", "slide-out");
+    // Force reflow then add show class for animation
+    void detailView.offsetWidth;
+    detailView.classList.add("show");
     makeWordsClickable(document.getElementById("articleTitle"), article.title);
     var titleCnEl = document.getElementById("articleTitleCn");
     if (article.titleCn) {
