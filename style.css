@@ -896,6 +896,148 @@ body.dark .speaker-icon { background: #1e3a5f; color: #4da3ff; }
 body.dark .article-title-row h2 { color: #e5e5ea; }
 body.dark .nav-arrow { background: #333; color: #4da3ff; border-color: #444; }
 
+/* === 背单词 === */
+.review-source-select, .review-count-select {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px 0;
+    align-items: center;
+}
+.review-source-select .topic-btn, .review-count-select button {
+    padding: 6px 14px;
+    border: 1px solid #e5e5ea;
+    border-radius: 14px;
+    background: white;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+}
+.review-source-select .topic-btn.active, .review-count-select button.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+}
+.review-area {
+    margin-top: 12px;
+    min-height: 300px;
+}
+.review-start {
+    text-align: center;
+    padding: 40px 0;
+    color: #aeaeb2;
+}
+.review-progress {
+    text-align: center;
+    font-size: 13px;
+    color: #aeaeb2;
+    margin-bottom: 12px;
+}
+.review-word {
+    font-size: 28px;
+    font-weight: 700;
+    text-align: center;
+    color: #1a1a2e;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+.review-phon {
+    text-align: center;
+    font-size: 14px;
+    color: #aeaeb2;
+    margin-bottom: 20px;
+}
+.review-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.review-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: white;
+    border: 2px solid #e5e5ea;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 15px;
+    transition: all 0.15s;
+}
+.review-option:active { transform: scale(0.97); }
+.review-option .review-opt-label {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: #f5f5f7;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 600; font-size: 13px;
+    color: #8e8e93;
+    flex-shrink: 0;
+}
+.review-option.selected.correct, .review-option.correct {
+    border-color: #34c759;
+    background: #f0fff4;
+}
+.review-option.selected.wrong {
+    border-color: #ff3b30;
+    background: #fff5f5;
+}
+.review-option.selected.correct .review-opt-label,
+.review-option.correct .review-opt-label {
+    background: #34c759;
+    color: white;
+}
+.review-option.selected.wrong .review-opt-label {
+    background: #ff3b30;
+    color: white;
+}
+.review-feedback {
+    text-align: center;
+    font-size: 15px;
+    margin-top: 12px;
+    min-height: 24px;
+}
+.review-result-score {
+    font-size: 48px;
+    font-weight: 700;
+    text-align: center;
+    color: var(--accent);
+    margin-bottom: 8px;
+}
+.review-result-pct {
+    text-align: center;
+    font-size: 18px;
+    color: #3a3a3c;
+    margin-bottom: 20px;
+}
+.review-result-detail {
+    font-size: 14px;
+    color: #8e8e93;
+    line-height: 1.8;
+}
+.review-result-word {
+    display: inline-block;
+    padding: 4px 10px;
+    background: #e8f5e9;
+    border-radius: 6px;
+    margin: 2px;
+    color: #2e7d32;
+    font-weight: 500;
+}
+body.dark .review-option { background: #252540; border-color: #444; color: #e5e5ea; }
+body.dark .review-option .review-opt-label { background: #333; color: #999; }
+body.dark .review-option.selected.correct, body.dark .review-option.correct { background: #1a3a1a; border-color: #4caf50; }
+body.dark .review-option.selected.wrong { background: #3a1a1a; border-color: #ff3b30; }
+body.dark .review-word { color: #e5e5ea; }
+body.dark .review-result-pct { color: #ccc; }
+body.dark .review-result-word { background: #1a3a1a; color: #4caf50; }
+body.dark .review-source-select .topic-btn, body.dark .review-count-select button { background: #252540; color: #ccc; border-color: #444; }
+body.dark .review-source-select .topic-btn.active, body.dark .review-count-select button.active { background: var(--accent); color: white; }
+
 /* === 手机 === */
 @media (max-width: 400px) {
     .container { padding: 8px 10px 30px; }

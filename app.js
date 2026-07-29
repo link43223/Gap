@@ -131,6 +131,7 @@ function menuAction(action) {
     if (action === "read") showArticleList(currentTopic);
     else if (action === "wordbank") showTab("wordbank");
     else if (action === "bookmarks") showTab("bookmarks");
+    else if (action === "review") showTab("review");
 }
 
 function toggleShowEn() {
@@ -356,6 +357,7 @@ function showTab(tabName) {
     document.getElementById("read-panel").style.display = (tabName === "read") ? "block" : "none";
     document.getElementById("wordbank-panel").style.display = (tabName === "wordbank") ? "block" : "none";
     document.getElementById("bookmarks-panel").style.display = (tabName === "bookmarks") ? "block" : "none";
+    document.getElementById("review-panel").style.display = (tabName === "review") ? "block" : "none";
     document.getElementById("topic-bar").style.display = (tabName === "read") ? "flex" : "none";
     if (tabName === "wordbank") renderWordBank();
     if (tabName === "bookmarks") renderBookmarks();
@@ -909,4 +911,179 @@ function exportWords() {
     var text = "我的单词库 - Gap\n==============================\n\n";
     bank.forEach(function(item) { text += item.word + "\n  " + item.meaning + "\n\n"; });
     var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], {type:"text/plain"})); a.download = "gap-wordbank.txt"; a.click();
+}
+
+// ==========================================
+// 背单词
+// ==========================================
+var REVIEW_SOURCE = "wordbank";
+var REVIEW_COUNT = 20;
+var REVIEW_WORDS = [];
+var REVIEW_IDX = 0;
+var REVIEW_SCORE = 0;
+var REVIEW_TOTAL = 0;
+var REVIEW_CORRECT = [];
+
+function getReviewWords() {
+    if (REVIEW_SOURCE === "wordbank") {
+        var bank = getWordBank();
+        if (!bank.length) return [];
+        return bank.map(function(item) { return { word: item.word, meaning: item.meaning }; });
+    }
+    if (!window.WORD_DATA || !WORD_DATA[REVIEW_SOURCE]) return [];
+    var list = WORD_DATA[REVIEW_SOURCE];
+    // Shuffle and get meanings from dict
+    var shuffled = list.slice();
+    for (var i = shuffled.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = shuffled[i]; shuffled[i] = shuffled[j]; shuffled[j] = tmp;
+    }
+    return shuffled.map(function(w) {
+        var meaning = "";
+        if (window.ZH_DICT && ZH_DICT[w]) meaning = ZH_DICT[w];
+        var lower = w.toLowerCase();
+        if (!meaning && window.ZH_DICT) {
+            // Try base forms
+            if (lower.endsWith("ing")) { var b = lower.slice(0,-3); if (ZH_DICT[b]) meaning = ZH_DICT[b]; }
+            if (!meaning && lower.endsWith("ed")) { var b = lower.slice(0,-2); if (ZH_DICT[b]) meaning = ZH_DICT[b]; }
+            if (!meaning && lower.endsWith("s") && !lower.endsWith("ss")) { var b = lower.slice(0,-1); if (ZH_DICT[b]) meaning = ZH_DICT[b]; }
+        }
+        return { word: w, meaning: meaning };
+    });
+}
+
+function selectReviewSource(src) {
+    REVIEW_SOURCE = src;
+    document.querySelectorAll("#reviewSourceSelect .topic-btn").forEach(function(b) { b.classList.remove("active"); });
+    var btns = document.querySelectorAll("#reviewSourceSelect .topic-btn");
+    var srcList = ["wordbank","高中必修1","高中必修2","高中必修3","四级高频","六级高频"];
+    var idx = srcList.indexOf(src);
+    if (idx >= 0 && idx < btns.length) btns[idx].classList.add("active");
+    document.getElementById("reviewQuiz").style.display = "none";
+    document.getElementById("reviewResult").style.display = "none";
+    document.getElementById("reviewStart").style.display = "block";
+}
+
+function setReviewCount(n) {
+    REVIEW_COUNT = n;
+    document.querySelectorAll("#reviewCountSelect button").forEach(function(b) { b.classList.remove("active"); });
+    var btns = document.querySelectorAll("#reviewCountSelect button");
+    var vals = [10,20,30,50];
+    var idx = vals.indexOf(n);
+    if (idx >= 0 && idx < btns.length) btns[idx].classList.add("active");
+}
+
+function startReview() {
+    var words = getReviewWords();
+    if (!words.length) {
+        alert(REVIEW_SOURCE === "wordbank" ? "单词库为空，请先在阅读中添加单词" : "该词库暂无数据");
+        return;
+    }
+    REVIEW_WORDS = words.slice(0, Math.min(REVIEW_COUNT, words.length));
+    REVIEW_IDX = 0;
+    REVIEW_SCORE = 0;
+    REVIEW_TOTAL = 0;
+    REVIEW_CORRECT = [];
+    document.getElementById("reviewStart").style.display = "none";
+    document.getElementById("reviewResult").style.display = "none";
+    document.getElementById("reviewQuiz").style.display = "block";
+    renderReviewQuestion();
+}
+
+function renderReviewQuestion() {
+    if (REVIEW_IDX >= REVIEW_WORDS.length) { showReviewResult(); return; }
+    var word = REVIEW_WORDS[REVIEW_IDX];
+    var quiz = document.getElementById("reviewQuiz");
+    var progress = (REVIEW_IDX + 1) + "/" + REVIEW_WORDS.length;
+    var phon = window.PHONETIC && PHONETIC[word.word.toLowerCase()] || "";
+
+    // Build options: 1 correct + 3 random wrong
+    var options = [word.meaning];
+    var pool = REVIEW_WORDS.filter(function(w) { return w.meaning && w.meaning !== word.meaning; });
+    // Also try to get distractors from dict
+    var allMeanings = Object.values(ZH_DICT || {}).filter(function(m) { return m && m !== word.meaning; });
+    while (options.length < 4 && (pool.length || allMeanings.length)) {
+        var pick;
+        if (pool.length) {
+            var idx = Math.floor(Math.random() * pool.length);
+            pick = pool[idx].meaning;
+            pool.splice(idx, 1);
+        } else {
+            var idx = Math.floor(Math.random() * allMeanings.length);
+            pick = allMeanings[idx];
+            allMeanings.splice(idx, 1);
+        }
+        if (options.indexOf(pick) === -1 && pick) options.push(pick);
+    }
+    // Shuffle options
+    for (var i = options.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = options[i]; options[i] = options[j]; options[j] = tmp;
+    }
+    var correctAns = word.meaning;
+    var speakerIcon = '<span class="speaker-icon" onclick="playPronunciation(\'' + word.word.replace(/'/g,"\\'") + '\')" title="播放读音"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19 11,5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg></span>';
+
+    var html = '<div class="review-progress">' + progress + '</div>';
+    html += '<div class="review-word">' + word.word + speakerIcon + '</div>';
+    if (phon) html += '<div class="review-phon">/' + phon + '/</div>';
+    html += '<div class="review-options">';
+
+    var labels = ["A","B","C","D"];
+    for (var i = 0; i < options.length; i++) {
+        var isCorrect = options[i] === correctAns;
+        html += '<div class="review-option" data-correct="' + isCorrect + '" onclick="checkReviewAnswer(this)">';
+        html += '<span class="review-opt-label">' + labels[i] + '</span>';
+        html += '<span class="review-opt-text">' + options[i] + '</span></div>';
+    }
+    html += '</div>';
+    html += '<div id="reviewFeedback" class="review-feedback"></div>';
+    html += '<button id="reviewNextBtn" class="action-btn" style="display:none;margin-top:12px;" onclick="nextReviewQuestion()">下一题</button>';
+    quiz.innerHTML = html;
+}
+
+function checkReviewAnswer(el) {
+    if (document.querySelector(".review-option.selected")) return;
+    el.classList.add("selected");
+    var correct = el.getAttribute("data-correct") === "true";
+    REVIEW_TOTAL++;
+    if (correct) {
+        REVIEW_SCORE++;
+        REVIEW_CORRECT.push(REVIEW_WORDS[REVIEW_IDX].word);
+        el.classList.add("correct");
+        document.getElementById("reviewFeedback").innerHTML = '<span style="color:#34c759;">✓ 正确！</span>';
+    } else {
+        el.classList.add("wrong");
+        document.getElementById("reviewFeedback").innerHTML = '<span style="color:#ff3b30;">✗ 正确答案：</span>' + REVIEW_WORDS[REVIEW_IDX].meaning;
+        // Highlight correct answer
+        document.querySelectorAll(".review-option").forEach(function(o) {
+            if (o.getAttribute("data-correct") === "true") o.classList.add("correct");
+        });
+    }
+    document.getElementById("reviewNextBtn").style.display = "block";
+}
+
+function nextReviewQuestion() {
+    REVIEW_IDX++;
+    renderReviewQuestion();
+}
+
+function showReviewResult() {
+    document.getElementById("reviewQuiz").style.display = "none";
+    document.getElementById("reviewResult").style.display = "block";
+    var pct = REVIEW_TOTAL > 0 ? Math.round(REVIEW_SCORE / REVIEW_TOTAL * 100) : 0;
+    var msg = pct >= 80 ? "太棒了！" : pct >= 60 ? "不错，继续加油！" : "再练练吧！";
+    var html = '<div class="review-result-score">' + REVIEW_SCORE + '/' + REVIEW_TOTAL + '</div>';
+    html += '<div class="review-result-pct">' + pct + '% ' + msg + '</div>';
+    if (REVIEW_CORRECT.length) {
+        html += '<div class="review-result-detail"><p>答对的词：</p>';
+        REVIEW_CORRECT.forEach(function(w) { html += '<span class="review-result-word">' + w + '</span> '; });
+        html += '</div>';
+    }
+    html += '<button class="action-btn" onclick="startReview()" style="margin-top:16px;">再来一轮</button>';
+    html += '<button class="action-btn secondary" onclick="closeReview()" style="margin-top:8px;">返回</button>';
+    document.getElementById("reviewResult").innerHTML = html;
+}
+
+function closeReview() {
+    showTab("read");
 }
