@@ -331,28 +331,6 @@ body.dark .topic-label {
     font-style: italic;
 }
 
-.inline-image-wrap {
-    margin: 20px 0;
-    text-align: center;
-}
-
-.inline-article-image {
-    max-width: 100%;
-    max-height: 300px;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    object-fit: contain;
-}
-
-.inline-image-caption {
-    font-size: 12px;
-    color: #aeaeb2;
-    text-align: center;
-    margin: 6px 0 0;
-    line-height: 1.4;
-    font-style: italic;
-}
-
 .tap-hint {
     font-size: 12px;
     color: #aeaeb2;
