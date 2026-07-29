@@ -313,22 +313,7 @@ body.dark .topic-label {
     border-radius: 12px;
     margin-bottom: 16px;
     object-fit: cover;
-    max-height: 320px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    opacity: 0;
-    transition: opacity 0.5s ease;
-}
-.article-image.loaded {
-    opacity: 1;
-}
-
-.article-image-caption {
-    font-size: 13px;
-    color: #aeaeb2;
-    text-align: center;
-    margin: -10px 0 16px;
-    line-height: 1.5;
-    font-style: italic;
+    max-height: 260px;
 }
 
 .tap-hint {
@@ -851,8 +836,6 @@ body.dark .text-btn { background: #333; color: #ccc; border-color: #444; }
 body.dark .export-btn { background: #333; color: #ccc; border-color: #444; }
 body.dark .empty-hint { color: #666; }
 body.dark .article-source { color: #666; }
-body.dark .article-image-caption { color: #666; }
-body.dark .inline-image-caption { color: #666; }
 body.dark #searchBar { background: #252540; }
 body.dark #searchInput { color: #e5e5ea; }
 body.dark #searchInput::placeholder { color: #666; }
