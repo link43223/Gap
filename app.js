@@ -531,8 +531,9 @@ function searchArticles(query) {
     for (var key in articles) {
         var a = articles[key];
         var inTitle = a.title.toLowerCase().indexOf(q) !== -1;
+        var inTitleCn = a.titleCn && a.titleCn.toLowerCase().indexOf(q) !== -1;
         var inText = a.text.toLowerCase().indexOf(q) !== -1;
-        if (inTitle || inText) {
+        if (inTitle || inTitleCn || inText) {
             var topicKey = key.split("-")[0];
             results.push({
                 key: key,

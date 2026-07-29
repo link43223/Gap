@@ -306,7 +306,7 @@ body.dark .topic-label {
     color: #1a1a2e;
     margin: 2px 0 10px;
     line-height: 1.4;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 body.dark .article-title-cn { color: #e5e5ea; }
@@ -315,7 +315,7 @@ body.dark .article-title-cn { color: #e5e5ea; }
     font-size: 18px;
     color: #1a1a2e;
     margin-bottom: 2px;
-    font-weight: 600;
+    font-weight: 700;
     line-height: 1.4;
 }
 
