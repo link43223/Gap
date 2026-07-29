@@ -148,7 +148,7 @@
         <div id="bmEmptyHint" class="empty-hint">还没有收藏</div>
     </div>
 
-    <div id="review-panel" class="panel" style="display:none;">
+        <div id="review-panel" class="panel" style="display:none;">
         <div id="reviewArea" class="review-area">
             <div id="reviewStart" class="review-start" style="display:flex;">
                 <div class="review-start-title">Gap 背单词</div>
@@ -197,54 +197,29 @@
         </div>
     </div>
     <div id="reviewSettingsPanel" class="review-settings-panel" style="display:none;">
-            <div class="review-settings-title">设置</div>
-            <div class="review-settings-row">
-                <span>词库</span>
-                <select id="reviewSourceSelect" onchange="selectReviewSource(this.value)">
-                    <option value="wordbank">单词库</option>
-                    <option value="高中必修1">高中必修1</option>
-                    <option value="高中必修2">高中必修2</option>
-                    <option value="高中必修3">高中必修3</option>
-                    <option value="四级高频">四级高频</option>
-                    <option value="六级高频">六级高频</option>
-                </select>
-            </div>
-            <div class="review-settings-row">
-                <span>每轮题数</span>
-                <select id="reviewCountSelect" onchange="setReviewCount(parseInt(this.value))">
-                    <option value="10">10</option>
-                    <option value="20" selected>20</option>
-                    <option value="30">30</option>
-                    <option value="50">50</option>
-                </select>
-            </div>
-            <button class="review-settings-close" onclick="closeReviewSettings()">完成</button>
+        <div class="review-settings-title">设置</div>
+        <div class="review-settings-row">
+            <span>词库</span>
+            <select id="reviewSourceSelect" onchange="selectReviewSource(this.value)">
+                <option value="wordbank">单词库</option>
+                <option value="高中必修1">高中必修1</option>
+                <option value="高中必修2">高中必修2</option>
+                <option value="高中必修3">高中必修3</option>
+                <option value="四级高频">四级高频</option>
+                <option value="六级高频">六级高频</option>
+            </select>
         </div>
-    </div>
-
-    <!-- 每日精选面板 -->
-    <div id="daily-panel" class="panel" style="display:none;">
-        <div class="panel-header"><h2>每日精选</h2></div>
-        <div id="dailyContent" class="article-content" style="padding:16px 0;line-height:1.8;"></div>
-    </div>
-
-    <!-- 底部导航栏 -->
-    <div class="bottom-nav">
-        <button class="nav-item active" onclick="switchTab('read')">
-            <svg class="nav-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-            <span class="nav-label">阅读</span>
-        </button>
-        <button class="nav-item" onclick="switchTab('daily')">
-            <svg class="nav-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            <span class="nav-label">每日精选</span>
-        </button>
-        <button class="nav-item" onclick="switchTab('review')">
-            <svg class="nav-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
-            <span class="nav-label">背单词</span>
-        </button>
-    </div>
-
-    <div id="wordPopup" class="word-popup">
+        <div class="review-settings-row">
+            <span>每轮题数</span>
+            <select id="reviewCountSelect" onchange="setReviewCount(parseInt(this.value))">
+                <option value="10">10</option>
+                <option value="20" selected>20</option>
+                <option value="30">30</option>
+                <option value="50">50</option>
+            </select>
+        </div>
+        <button class="review-settings-close" onclick="closeReviewSettings()">完成</button>
+    </div><div id="wordPopup" class="word-popup">
         <div class="popup-header"><strong id="popupWord"></strong><button class="icon-btn close-btn" onclick="closePopup()">×</button></div>
         <div id="popupMeaning"></div>
         <div class="popup-actions">
