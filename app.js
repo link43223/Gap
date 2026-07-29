@@ -294,6 +294,14 @@ document.addEventListener("click", function(e) {
     if (!e.target.closest("#fontSelectWrap") && !e.target.closest("#fontPicker")) {
         document.getElementById("fontPicker").classList.remove("show");
     }
+    if (!e.target.closest("#reviewSourceWrap") && !e.target.closest("#reviewSourcePicker")) {
+        var el = document.getElementById("reviewSourcePicker");
+        if (el) el.classList.remove("show");
+    }
+    if (!e.target.closest("#reviewCountWrap") && !e.target.closest("#reviewCountPicker")) {
+        var el = document.getElementById("reviewCountPicker");
+        if (el) el.classList.remove("show");
+    }
 });
 
 function initAccent() {
@@ -960,10 +968,22 @@ function getReviewWords() {
 
 function selectReviewSource(src) {
     REVIEW_SOURCE = src;
+    var labels = { "wordbank": "单词库", "高中必修1": "必修1", "高中必修2": "必修2", "高中必修3": "必修3", "四级高频": "四级", "六级高频": "六级" };
+    document.getElementById("reviewSourceLabel").textContent = labels[src] || src;
+    document.getElementById("reviewSourcePicker").classList.remove("show");
 }
-
 function setReviewCount(n) {
     REVIEW_COUNT = n;
+    document.getElementById("reviewCountLabel").textContent = n;
+    document.getElementById("reviewCountPicker").classList.remove("show");
+}
+function toggleReviewSource() {
+    document.getElementById("reviewCountPicker").classList.remove("show");
+    document.getElementById("reviewSourcePicker").classList.toggle("show");
+}
+function toggleReviewCount() {
+    document.getElementById("reviewSourcePicker").classList.remove("show");
+    document.getElementById("reviewCountPicker").classList.toggle("show");
 }
 
 function setReviewCount(n) {

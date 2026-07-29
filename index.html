@@ -158,20 +158,28 @@
             <div id="reviewStart" class="review-start" style="display:flex;">
                 <div class="review-start-title">Gap 背单词</div>
                 <div class="review-start-settings">
-                    <select id="reviewSourceSelect" onchange="selectReviewSource(this.value)">
-                        <option value="wordbank">单词库</option>
-                        <option value="高中必修1">高中必修1</option>
-                        <option value="高中必修2">高中必修2</option>
-                        <option value="高中必修3">高中必修3</option>
-                        <option value="四级高频">四级高频</option>
-                        <option value="六级高频">六级高频</option>
-                    </select>
-                    <select id="reviewCountSelect" onchange="setReviewCount(parseInt(this.value))">
-                        <option value="10">10</option>
-                        <option value="20" selected>20</option>
-                        <option value="30">30</option>
-                        <option value="50">50</option>
-                    </select>
+                    <div class="custom-select" id="reviewSourceWrap" onclick="toggleReviewSource()">
+                        <span id="reviewSourceLabel">单词库</span>
+                        <span style="font-size:10px;color:#8e8e93;">▼</span>
+                    </div>
+                    <div id="reviewSourcePicker" class="font-picker">
+                        <div class="font-option" onclick="selectReviewSource('wordbank')">单词库</div>
+                        <div class="font-option" onclick="selectReviewSource('高中必修1')">高中必修1</div>
+                        <div class="font-option" onclick="selectReviewSource('高中必修2')">高中必修2</div>
+                        <div class="font-option" onclick="selectReviewSource('高中必修3')">高中必修3</div>
+                        <div class="font-option" onclick="selectReviewSource('四级高频')">四级高频</div>
+                        <div class="font-option" onclick="selectReviewSource('六级高频')">六级高频</div>
+                    </div>
+                    <div class="custom-select" id="reviewCountWrap" onclick="toggleReviewCount()">
+                        <span id="reviewCountLabel">20</span>
+                        <span style="font-size:10px;color:#8e8e93;">▼</span>
+                    </div>
+                    <div id="reviewCountPicker" class="font-picker">
+                        <div class="font-option" onclick="setReviewCount(10)">10</div>
+                        <div class="font-option active" onclick="setReviewCount(20)">20</div>
+                        <div class="font-option" onclick="setReviewCount(30)">30</div>
+                        <div class="font-option" onclick="setReviewCount(50)">50</div>
+                    </div>
                 </div>
                 <div class="review-start-btns">
                     <button class="review-start-btn primary" onclick="openReviewStudy()">背单词</button>
