@@ -394,6 +394,7 @@ function showArticleList(topic) {
         if (preview.length > 150) preview = preview.slice(0, 150) + "...";
         return '<div class="article-list-item" onclick="openArticle(\'' + key + '\')">' +
             '<div class="ali-title">' + a.title + '</div>' +
+            (a.titleCn ? '<div class="ali-title-cn">' + a.titleCn + '</div>' : '') +
             '<div class="ali-preview">' + preview + '</div>' +
             (a.source ? '<div class="ali-source">' + a.source + '</div>' : '') +
             '</div>';
@@ -449,6 +450,13 @@ function loadArticle(key) {
     currentArticleKey = key;
     currentTopic = key.split("-")[0];
     makeWordsClickable(document.getElementById("articleTitle"), article.title);
+    var titleCnEl = document.getElementById("articleTitleCn");
+    if (article.titleCn) {
+        titleCnEl.textContent = article.titleCn;
+        titleCnEl.style.display = "block";
+    } else {
+        titleCnEl.style.display = "none";
+    }
     var src = article.source || "";
     if (src.indexOf("Wikipedia") === 0) src = "Wikipedia";
     document.getElementById("articleSource").textContent = src ? "来源：" + src : "";
@@ -529,6 +537,7 @@ function searchArticles(query) {
             results.push({
                 key: key,
                 title: a.title,
+                titleCn: a.titleCn || "",
                 text: a.text,
                 source: a.source || "",
                 topic: TOPIC_NAMES[topicKey] || "",
@@ -551,6 +560,7 @@ function renderSearchResults(results) {
         if (preview.length > 150) preview = preview.slice(0, 150) + "...";
         return '<div class="article-list-item" onclick="openArticle(\'' + r.key + '\')">' +
             '<div class="ali-title">' + r.title + '</div>' +
+            (r.titleCn ? '<div class="ali-title-cn">' + r.titleCn + '</div>' : '') +
             '<div class="ali-preview">' + preview + '</div>' +
             (r.topic ? '<div class="ali-source">话题：' + r.topic + '</div>' : '') +
             '</div>';
