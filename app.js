@@ -490,6 +490,7 @@ function loadArticle(key) {
         };
         imgEl.src = article.image;
         imgEl.alt = article.title;
+        imgEl.referrerPolicy = "no-referrer";
     } else {
         imgEl.style.display = "none";
         capEl.style.display = "none";
