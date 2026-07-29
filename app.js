@@ -413,11 +413,16 @@ function openArticle(key) {
 
 // 返回列表
 function backToList() {
-    document.getElementById("articleListView").style.display = "block";
-    document.getElementById("articleDetailView").style.display = "none";
-    document.getElementById("textSettingsGroup").style.display = "none";
-    closePopup();
-    window.scrollTo(0, 0);
+    var detail = document.getElementById("articleDetailView");
+    detail.classList.add("slide-out");
+    setTimeout(function() {
+        document.getElementById("articleListView").style.display = "block";
+        detail.style.display = "none";
+        detail.classList.remove("slide-out");
+        document.getElementById("textSettingsGroup").style.display = "none";
+        closePopup();
+        window.scrollTo(0, 0);
+    }, 250);
 }
 
 // ==========================================

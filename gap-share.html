@@ -284,6 +284,15 @@ body.dark .topic-label {
     to   { transform: translateY(0); opacity: 1; }
 }
 
+@keyframes articleSlideDown {
+    from { transform: translateY(0); opacity: 1; }
+    to   { transform: translateY(40px); opacity: 0; }
+}
+
+#articleDetailView.slide-out {
+    animation: articleSlideDown 0.25s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
 /* === 文章 === */
 .article-card {
     background: white;
