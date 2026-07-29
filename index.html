@@ -156,78 +156,31 @@
 
     <div id="review-panel" class="panel" style="display:none;">
         <div id="reviewArea" class="review-area">
-            <div id="reviewStart" class="review-start" style="display:flex;">
-                <div class="review-start-title">Gap 背单词</div>
-                <div class="review-start-settings">
-                    <div class="custom-select" id="reviewSourceWrap" onclick="toggleReviewSource()">
-                        <span id="reviewSourceLabel">单词库</span>
-                        <span style="font-size:10px;color:#8e8e93;">▼</span>
-                    </div>
-                    <div id="reviewSourcePicker" class="font-picker">
-                        <div class="font-option" onclick="selectReviewSource('wordbank')">单词库</div>
-                        <div class="font-option" onclick="selectReviewSource('高中必修1')">高中必修1</div>
-                        <div class="font-option" onclick="selectReviewSource('高中必修2')">高中必修2</div>
-                        <div class="font-option" onclick="selectReviewSource('高中必修3')">高中必修3</div>
-                        <div class="font-option" onclick="selectReviewSource('四级高频')">四级高频</div>
-                        <div class="font-option" onclick="selectReviewSource('六级高频')">六级高频</div>
-                    </div>
-                    <div class="custom-select" id="reviewCountWrap" onclick="toggleReviewCount()">
-                        <span id="reviewCountLabel">20</span>
-                        <span style="font-size:10px;color:#8e8e93;">▼</span>
-                    </div>
-                    <div id="reviewCountPicker" class="font-picker">
-                        <div class="font-option" onclick="setReviewCount(10)">10</div>
-                        <div class="font-option active" onclick="setReviewCount(20)">20</div>
-                        <div class="font-option" onclick="setReviewCount(30)">30</div>
-                        <div class="font-option" onclick="setReviewCount(50)">50</div>
-                    </div>
+            <div class="review-top">
+                <div class="review-book" id="reviewBookBtn" onclick="changeWordBank()">
+                    <span class="review-book-icon">📖</span>
+                    <span class="review-book-sub">点击选择词书</span>
                 </div>
-                <div class="review-start-btns">
-                    <button class="review-start-btn primary" onclick="openReviewStudy()">背单词</button>
-                    <button class="review-start-btn secondary" onclick="openReviewWrong()">复习</button>
+                <div class="review-info">
+                    <div class="review-bank-name" id="reviewBankName">高中必修1</div>
+                    <div class="review-stats" id="reviewStats">0/0</div>
+                    <div class="review-bar"><div class="review-fill" id="reviewFill" style="width:0%"></div></div>
                 </div>
             </div>
-            <div id="reviewQuiz" style="display:none;">
-                <div class="review-progress" id="reviewProgress"></div>
-                <div class="review-card">
-                    <div class="review-word-wrap">
-                        <div id="reviewWordEl" class="review-word"></div>
-                        <div id="reviewPhonEl" class="review-phon"></div>
-                    </div>
-                    <div id="reviewOptions" class="review-options"></div>
-                    <div id="reviewFeedback" class="review-feedback"></div>
+            <div class="review-actions">
+                <div class="review-action study" onclick="startStudy()">
+                    <span class="ra-icon">📝</span>
+                    <span class="ra-label">学习</span>
                 </div>
-                <button id="reviewNextBtn" class="review-next-btn" style="display:none" onclick="nextReviewQuestion()">下一题</button>
+                <div class="review-action review" onclick="startReview()">
+                    <span class="ra-icon">🔄</span>
+                    <span class="ra-label">复习</span>
+                </div>
             </div>
-            <div id="reviewResult" style="display:none;" class="review-result"></div>
+            <div id="reviewQuiz" style="display:none;"></div>
         </div>
-    </div>
-    <div id="reviewSettingsPanel" class="review-settings-panel" style="display:none;">
-        <div class="review-settings-title">设置</div>
-        <div class="review-settings-row">
-            <span>词库</span>
-            <select id="reviewSourceSelect" onchange="selectReviewSource(this.value)">
-                <option value="wordbank">单词库</option>
-                <option value="高中必修1">高中必修1</option>
-                <option value="高中必修2">高中必修2</option>
-                <option value="高中必修3">高中必修3</option>
-                <option value="四级高频">四级高频</option>
-                <option value="六级高频">六级高频</option>
-            </select>
-        </div>
-        <div class="review-settings-row">
-            <span>每轮题数</span>
-            <select id="reviewCountSelect" onchange="setReviewCount(parseInt(this.value))">
-                <option value="10">10</option>
-                <option value="20" selected>20</option>
-                <option value="30">30</option>
-                <option value="50">50</option>
-            </select>
-        </div>
-        <button class="review-settings-close" onclick="closeReviewSettings()">完成</button>
     </div>
 
-    <!-- 底部导航栏 -->
     <div class="bottom-nav">
         <button class="nav-item active" onclick="switchTab('read')">
             <svg class="nav-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>

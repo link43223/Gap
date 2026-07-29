@@ -383,6 +383,7 @@ function switchTab(tabName) {
     showTab(tabName);
     if (tabName === "read") showArticleList(currentTopic);
     else if (tabName === "daily") showDailyPick();
+    else if (tabName === "review") updateReviewInfo();
 }
 
 // ==========================================
@@ -945,199 +946,24 @@ function exportWords() {
 // 背单词
 // ==========================================
 var REVIEW_SOURCE = "wordbank";
-var REVIEW_COUNT = 20;
-var REVIEW_WORDS = [];
-var REVIEW_IDX = 0;
-var REVIEW_SCORE = 0;
-var REVIEW_TOTAL = 0;
-var REVIEW_CORRECT = [];
 
-function getReviewWords() {
-    if (REVIEW_SOURCE === "wordbank") {
-        var bank = getWordBank();
-        if (!bank.length) return [];
-        return bank.map(function(item) { return { word: item.word, meaning: item.meaning }; });
-    }
-    if (!window.WORD_DATA || !WORD_DATA[REVIEW_SOURCE]) return [];
-    var list = WORD_DATA[REVIEW_SOURCE];
-    // Shuffle and get meanings from dict
-    var shuffled = list.slice();
-    for (var i = shuffled.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var tmp = shuffled[i]; shuffled[i] = shuffled[j]; shuffled[j] = tmp;
-    }
-    return shuffled.map(function(w) {
-        var meaning = "";
-        if (window.ZH_DICT && ZH_DICT[w]) meaning = ZH_DICT[w];
-        var lower = w.toLowerCase();
-        if (!meaning && window.ZH_DICT) {
-            // Try base forms
-            if (lower.endsWith("ing")) { var b = lower.slice(0,-3); if (ZH_DICT[b]) meaning = ZH_DICT[b]; }
-            if (!meaning && lower.endsWith("ed")) { var b = lower.slice(0,-2); if (ZH_DICT[b]) meaning = ZH_DICT[b]; }
-            if (!meaning && lower.endsWith("s") && !lower.endsWith("ss")) { var b = lower.slice(0,-1); if (ZH_DICT[b]) meaning = ZH_DICT[b]; }
-        }
-        return { word: w, meaning: meaning };
-    });
+function changeWordBank() {
+    var banks = ["wordbank", "高中必修1", "高中必修2", "高中必修3", "四级高频", "六级高频"];
+    var idx = banks.indexOf(REVIEW_SOURCE);
+    REVIEW_SOURCE = banks[(idx + 1) % banks.length];
+    updateReviewInfo();
 }
 
-function selectReviewSource(src) {
-    REVIEW_SOURCE = src;
-    var labels = { "wordbank": "单词库", "高中必修1": "必修1", "高中必修2": "必修2", "高中必修3": "必修3", "四级高频": "四级", "六级高频": "六级" };
-    document.getElementById("reviewSourceLabel").textContent = labels[src] || src;
-    document.getElementById("reviewSourcePicker").classList.remove("show");
-}
-function setReviewCount(n) {
-    REVIEW_COUNT = n;
-    document.getElementById("reviewCountLabel").textContent = n;
-    document.getElementById("reviewCountPicker").classList.remove("show");
-}
-function toggleReviewSource() {
-    document.getElementById("reviewCountPicker").classList.remove("show");
-    document.getElementById("reviewSourcePicker").classList.toggle("show");
-}
-function toggleReviewCount() {
-    document.getElementById("reviewSourcePicker").classList.remove("show");
-    document.getElementById("reviewCountPicker").classList.toggle("show");
+function updateReviewInfo() {
+    var labels = { "wordbank": "单词库", "高中必修1": "必修1", "高中必修2": "必修2", "高中必修3": "必修3", "四级高频": "四级高频", "六级高频": "六级高频" };
+    document.getElementById("reviewBankName").textContent = labels[REVIEW_SOURCE] || REVIEW_SOURCE;
+    var total = 0;
+    if (REVIEW_SOURCE === "wordbank") total = getWordBank().length;
+    else if (window.WORD_DATA && WORD_DATA[REVIEW_SOURCE]) total = WORD_DATA[REVIEW_SOURCE].length;
+    var done = parseInt(localStorage.getItem("gap_review_done_" + REVIEW_SOURCE) || "0");
+    document.getElementById("reviewStats").textContent = done + "/" + total;
+    document.getElementById("reviewFill").style.width = total > 0 ? (done / total * 100) + "%" : "0%";
 }
 
-function setReviewCount(n) {
-    REVIEW_COUNT = n;
-    document.querySelectorAll("#reviewCountSelect button").forEach(function(b) { b.classList.remove("active"); });
-    var btns = document.querySelectorAll("#reviewCountSelect button");
-    var vals = [10,20,30,50];
-    var idx = vals.indexOf(n);
-    if (idx >= 0 && idx < btns.length) btns[idx].classList.add("active");
-}
-
-function startReview() {
-    var words = getReviewWords();
-    if (!words.length) {
-        alert(REVIEW_SOURCE === "wordbank" ? "单词库为空" : "该词库暂无数据");
-        return;
-    }
-    REVIEW_WORDS = words.slice(0, Math.min(REVIEW_COUNT, words.length));
-    REVIEW_IDX = 0; REVIEW_SCORE = 0; REVIEW_TOTAL = 0; REVIEW_CORRECT = [];
-    document.getElementById("reviewStart").style.display = "none";
-    document.getElementById("reviewResult").style.display = "none";
-    document.getElementById("reviewQuiz").style.display = "block";
-    renderReviewQuestion();
-}
-
-var REVIEW_BG = ["linear-gradient(135deg,#667eea,#764ba2)","linear-gradient(135deg,#f093fb,#f5576c)","linear-gradient(135deg,#4facfe,#00f2fe)","linear-gradient(135deg,#43e97b,#38f9d7)","linear-gradient(135deg,#fa709a,#fee140)","linear-gradient(135deg,#a18cd1,#fbc2eb)","linear-gradient(135deg,#fccb90,#d57eeb)","linear-gradient(135deg,#e0c3fc,#8ec5fc)","linear-gradient(135deg,#f5576c,#ff6f00)","linear-gradient(135deg,#667eea,#43e97b)"];
-
-function renderReviewQuestion() {
-    if (REVIEW_IDX >= REVIEW_WORDS.length) { showReviewResult(); return; }
-    var w = REVIEW_WORDS[REVIEW_IDX];
-    document.getElementById("reviewProgress").textContent = (REVIEW_IDX+1) + " / " + REVIEW_WORDS.length;
-    document.getElementById("reviewWordEl").textContent = w.word;
-    var phon = window.PHONETIC && PHONETIC[w.word.toLowerCase()] || "";
-    document.getElementById("reviewPhonEl").textContent = phon ? "/" + phon + "/" : "";
-    var opts = [w.meaning];
-    var pool = REVIEW_WORDS.filter(function(x) { return x.meaning && x.meaning !== w.meaning; });
-    var allM = Object.values(ZH_DICT || {}).filter(function(m) { return m && m !== w.meaning; });
-    while (opts.length < 4 && (pool.length || allM.length)) {
-        var p;
-        if (pool.length) { var idx = Math.floor(Math.random()*pool.length); p = pool[idx].meaning; pool.splice(idx,1); }
-        else { var idx = Math.floor(Math.random()*allM.length); p = allM[idx]; allM.splice(idx,1); }
-        if (opts.indexOf(p) === -1 && p) opts.push(p);
-    }
-    for (var i = opts.length-1; i > 0; i--) { var j = Math.floor(Math.random()*(i+1)); var t = opts[i]; opts[i] = opts[j]; opts[j] = t; }
-    var labels = ["A","B","C","D"];
-    var html = "";
-    for (var i = 0; i < opts.length; i++) {
-        html += '<div class="review-option" data-correct="' + (opts[i] === w.meaning) + '" onclick="checkReviewAnswer(this)">';
-        html += '<span class="review-opt-label">' + labels[i] + '</span><span>' + opts[i] + '</span></div>';
-    }
-    document.getElementById("reviewOptions").innerHTML = html;
-    document.getElementById("reviewFeedback").textContent = "";
-    document.getElementById("reviewNextBtn").style.display = "none";
-    setTimeout(function() { playPronunciation(w.word); }, 300);
-}
-
-function checkReviewAnswer(el) {
-    if (document.querySelector(".review-option.selected")) return;
-    el.classList.add("selected");
-    REVIEW_TOTAL++;
-    if (el.getAttribute("data-correct") === "true") {
-        REVIEW_SCORE++; REVIEW_CORRECT.push(REVIEW_WORDS[REVIEW_IDX].word);
-        el.classList.add("correct");
-        document.getElementById("reviewFeedback").innerHTML = '<span>✓ 正确！</span>';
-    } else {
-        el.classList.add("wrong");
-        document.getElementById("reviewFeedback").innerHTML = '<span>正确答案：' + REVIEW_WORDS[REVIEW_IDX].meaning + '</span>';
-        document.querySelectorAll(".review-option").forEach(function(o) { if (o.getAttribute("data-correct") === "true") o.classList.add("correct"); });
-        addWrongWord(REVIEW_WORDS[REVIEW_IDX].word);
-    }
-    document.getElementById("reviewNextBtn").style.display = "block";
-}
-
-function nextReviewQuestion() {
-    REVIEW_IDX++;
-    renderReviewQuestion();
-}
-
-function showDailyPick() {
-    showTab("daily");
-    var div = document.getElementById("dailyContent");
-    var keys = Object.keys(articles);
-    var key = keys[Math.floor(Math.random() * keys.length)];
-    var a = articles[key];
-    if (!a) { div.innerHTML = "<p>暂无内容</p>"; return; }
-    var topics = {science:"科学科技",health:"健康",life:"生活",culture:"文化",nature:"自然",sports:"体育",gaming:"游戏"};
-    var t = key.split("-")[0];
-    var topicName = topics[t] || t;
-    div.innerHTML = '<div style="margin-bottom:16px;"><span style="font-size:13px;color:#aeaeb2;">今日推荐</span></div>' +
-        '<div style="font-size:20px;font-weight:600;color:#1a1a2e;margin-bottom:4px;">' + a.title + '</div>' +
-        (a.titleCn ? '<div style="font-size:18px;font-weight:700;color:#1a1a2e;margin-bottom:8px;">' + a.titleCn + '</div>' : '') +
-        '<div style="font-size:12px;color:#aeaeb2;margin-bottom:12px;">话题：' + topicName + '</div>' +
-        '<div style="font-size:15px;color:#3a3a3c;line-height:1.8;">' + a.text.substring(0, 300) + '…</div>' +
-        '<button class="action-btn" style="margin-top:16px;" onclick="openArticle(\'' + key + '\');showTab(\'read\');">阅读全文</button>';
-}
-
-function showReviewResult() {
-    document.getElementById("reviewQuiz").style.display = "none";
-    document.getElementById("reviewResult").style.display = "flex";
-    var pct = REVIEW_TOTAL > 0 ? Math.round(REVIEW_SCORE / REVIEW_TOTAL * 100) : 0;
-    var msg = pct >= 80 ? "太棒了！" : pct >= 60 ? "不错！" : "再练练！";
-    var html = '<div class="review-result-score">' + REVIEW_SCORE + '/' + REVIEW_TOTAL + '</div>';
-    html += '<div class="review-result-pct">' + pct + '%</div>';
-    html += '<div class="review-result-msg">' + msg + '</div>';
-    if (REVIEW_CORRECT.length) {
-        html += '<div class="review-result-words">';
-        REVIEW_CORRECT.forEach(function(w) { html += '<span class="review-result-word">' + w + '</span> '; });
-        html += '</div>';
-    }
-    html += '<button class="review-result-btn primary" onclick="startReview()">再来一轮</button>';
-    html += '<button class="review-result-btn secondary" onclick="closeReview()">返回</button>';
-    document.getElementById("reviewResult").innerHTML = html;
-}
-
-function closeReview() { showTab("read"); }
-function openReviewSettings() { document.getElementById("reviewSettingsPanel").style.display = "block"; }
-function closeReviewSettings() { document.getElementById("reviewSettingsPanel").style.display = "none"; }
-function openReviewStudy() { startReview(); }
-function openReviewWrong() {
-    var wrong = getWrongWords();
-    if (!wrong.length) { alert("还没有错词记录，先背单词吧！"); return; }
-    REVIEW_WORDS = [];
-    for (var i = 0; i < wrong.length; i++) {
-        var meaning = ZH_DICT && ZH_DICT[wrong[i]] || getBasicMeaning(wrong[i]);
-        REVIEW_WORDS.push({ word: wrong[i], meaning: meaning || "" });
-    }
-    REVIEW_IDX = 0; REVIEW_SCORE = 0; REVIEW_TOTAL = 0; REVIEW_CORRECT = [];
-    document.getElementById("reviewStart").style.display = "none";
-    document.getElementById("reviewResult").style.display = "none";
-    document.getElementById("reviewQuiz").style.display = "block";
-    renderReviewQuestion();
-}
-function getWrongWords() { try { return JSON.parse(localStorage.getItem("gap_wrong_words") || "[]"); } catch(e) { return []; } }
-function addWrongWord(word) { var wrong = getWrongWords(); if (wrong.indexOf(word) === -1) wrong.push(word); localStorage.setItem("gap_wrong_words", JSON.stringify(wrong)); }
-function getBasicMeaning(word) {
-    if (!window.ZH_DICT) return "";
-    if (ZH_DICT[word]) return ZH_DICT[word];
-    var lower = word.toLowerCase();
-    if (lower.endsWith("ing")) { var b = lower.slice(0,-3); if (ZH_DICT[b]) return ZH_DICT[b]; }
-    if (lower.endsWith("ed")) { var b = lower.slice(0,-2); if (ZH_DICT[b]) return ZH_DICT[b]; }
-    if (lower.endsWith("s") && !lower.endsWith("ss")) { var b = lower.slice(0,-1); if (ZH_DICT[b]) return ZH_DICT[b]; }
-    return "";
-}
+function startStudy() { alert("学习功能即将上线"); }
+function startReview() { alert("复习功能即将上线"); }
