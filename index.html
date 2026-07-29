@@ -150,32 +150,34 @@
     </div>
 
     <div id="review-panel" class="panel" style="display:none;">
-        <div class="panel-header">
-            <h2>背单词</h2>
-            <button class="text-btn" onclick="closeReview()">关闭</button>
-        </div>
-        <div id="reviewSourceSelect" class="review-source-select">
-            <button class="topic-btn active" onclick="selectReviewSource('wordbank')">单词库</button>
-            <button class="topic-btn" onclick="selectReviewSource('高中必修1')">必修1</button>
-            <button class="topic-btn" onclick="selectReviewSource('高中必修2')">必修2</button>
-            <button class="topic-btn" onclick="selectReviewSource('高中必修3')">必修3</button>
-            <button class="topic-btn" onclick="selectReviewSource('四级高频')">四级</button>
-            <button class="topic-btn" onclick="selectReviewSource('六级高频')">六级</button>
-        </div>
-        <div id="reviewCountSelect" class="review-count-select">
-            <span>每次：</span>
-            <button onclick="setReviewCount(10)">10</button>
-            <button onclick="setReviewCount(20)" class="active">20</button>
-            <button onclick="setReviewCount(30)">30</button>
-            <button onclick="setReviewCount(50)">50</button>
+        <div id="reviewBg" class="review-bg"></div>
+        <div class="review-top-bar">
+            <button onclick="closeReview()">✕</button>
+            <button onclick="openReviewSettings()">⚙</button>
         </div>
         <div id="reviewArea" class="review-area">
             <div id="reviewStart" class="review-start">
-                <p>选择词库和数量后开始</p>
+                <p style="font-size:18px;font-weight:600;">准备好了吗？</p>
+                <div class="review-settings" id="reviewSettingsInline">
+                    <select id="reviewSourceSelect" onchange="selectReviewSource(this.value)">
+                        <option value="wordbank">单词库</option>
+                        <option value="高中必修1">高中必修1</option>
+                        <option value="高中必修2">高中必修2</option>
+                        <option value="高中必修3">高中必修3</option>
+                        <option value="四级高频">四级高频</option>
+                        <option value="六级高频">六级高频</option>
+                    </select>
+                    <select id="reviewCountSelect" onchange="setReviewCount(parseInt(this.value))">
+                        <option value="10">10题</option>
+                        <option value="20" selected>20题</option>
+                        <option value="30">30题</option>
+                        <option value="50">50题</option>
+                    </select>
+                </div>
                 <button class="action-btn" onclick="startReview()">开始复习</button>
             </div>
             <div id="reviewQuiz" style="display:none;"></div>
-            <div id="reviewResult" style="display:none;"></div>
+            <div id="reviewResult" style="display:none;" class="review-result"></div>
         </div>
     </div>
 

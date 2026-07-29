@@ -954,14 +954,10 @@ function getReviewWords() {
 
 function selectReviewSource(src) {
     REVIEW_SOURCE = src;
-    document.querySelectorAll("#reviewSourceSelect .topic-btn").forEach(function(b) { b.classList.remove("active"); });
-    var btns = document.querySelectorAll("#reviewSourceSelect .topic-btn");
-    var srcList = ["wordbank","高中必修1","高中必修2","高中必修3","四级高频","六级高频"];
-    var idx = srcList.indexOf(src);
-    if (idx >= 0 && idx < btns.length) btns[idx].classList.add("active");
-    document.getElementById("reviewQuiz").style.display = "none";
-    document.getElementById("reviewResult").style.display = "none";
-    document.getElementById("reviewStart").style.display = "block";
+}
+
+function setReviewCount(n) {
+    REVIEW_COUNT = n;
 }
 
 function setReviewCount(n) {
@@ -976,88 +972,61 @@ function setReviewCount(n) {
 function startReview() {
     var words = getReviewWords();
     if (!words.length) {
-        alert(REVIEW_SOURCE === "wordbank" ? "单词库为空，请先在阅读中添加单词" : "该词库暂无数据");
+        alert(REVIEW_SOURCE === "wordbank" ? "单词库为空" : "该词库暂无数据");
         return;
     }
     REVIEW_WORDS = words.slice(0, Math.min(REVIEW_COUNT, words.length));
-    REVIEW_IDX = 0;
-    REVIEW_SCORE = 0;
-    REVIEW_TOTAL = 0;
-    REVIEW_CORRECT = [];
+    REVIEW_IDX = 0; REVIEW_SCORE = 0; REVIEW_TOTAL = 0; REVIEW_CORRECT = [];
     document.getElementById("reviewStart").style.display = "none";
     document.getElementById("reviewResult").style.display = "none";
     document.getElementById("reviewQuiz").style.display = "block";
     renderReviewQuestion();
 }
 
+var REVIEW_BG = ["linear-gradient(135deg,#667eea,#764ba2)","linear-gradient(135deg,#f093fb,#f5576c)","linear-gradient(135deg,#4facfe,#00f2fe)","linear-gradient(135deg,#43e97b,#38f9d7)","linear-gradient(135deg,#fa709a,#fee140)","linear-gradient(135deg,#a18cd1,#fbc2eb)","linear-gradient(135deg,#fccb90,#d57eeb)","linear-gradient(135deg,#e0c3fc,#8ec5fc)","linear-gradient(135deg,#f5576c,#ff6f00)","linear-gradient(135deg,#667eea,#43e97b)"];
+
 function renderReviewQuestion() {
     if (REVIEW_IDX >= REVIEW_WORDS.length) { showReviewResult(); return; }
-    var word = REVIEW_WORDS[REVIEW_IDX];
-    var quiz = document.getElementById("reviewQuiz");
-    var progress = (REVIEW_IDX + 1) + "/" + REVIEW_WORDS.length;
-    var phon = window.PHONETIC && PHONETIC[word.word.toLowerCase()] || "";
-
-    // Build options: 1 correct + 3 random wrong
-    var options = [word.meaning];
-    var pool = REVIEW_WORDS.filter(function(w) { return w.meaning && w.meaning !== word.meaning; });
-    // Also try to get distractors from dict
-    var allMeanings = Object.values(ZH_DICT || {}).filter(function(m) { return m && m !== word.meaning; });
-    while (options.length < 4 && (pool.length || allMeanings.length)) {
-        var pick;
-        if (pool.length) {
-            var idx = Math.floor(Math.random() * pool.length);
-            pick = pool[idx].meaning;
-            pool.splice(idx, 1);
-        } else {
-            var idx = Math.floor(Math.random() * allMeanings.length);
-            pick = allMeanings[idx];
-            allMeanings.splice(idx, 1);
-        }
-        if (options.indexOf(pick) === -1 && pick) options.push(pick);
+    var w = REVIEW_WORDS[REVIEW_IDX];
+    document.getElementById("reviewBg").style.background = REVIEW_BG[REVIEW_IDX % REVIEW_BG.length];
+    var phon = window.PHONETIC && PHONETIC[w.word.toLowerCase()] || "";
+    var opts = [w.meaning];
+    var pool = REVIEW_WORDS.filter(function(x) { return x.meaning && x.meaning !== w.meaning; });
+    var allM = Object.values(ZH_DICT || {}).filter(function(m) { return m && m !== w.meaning; });
+    while (opts.length < 4 && (pool.length || allM.length)) {
+        var p;
+        if (pool.length) { var idx = Math.floor(Math.random()*pool.length); p = pool[idx].meaning; pool.splice(idx,1); }
+        else { var idx = Math.floor(Math.random()*allM.length); p = allM[idx]; allM.splice(idx,1); }
+        if (opts.indexOf(p) === -1 && p) opts.push(p);
     }
-    // Shuffle options
-    for (var i = options.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var tmp = options[i]; options[i] = options[j]; options[j] = tmp;
-    }
-    var correctAns = word.meaning;
-    var speakerIcon = '<span class="speaker-icon" onclick="playPronunciation(\'' + word.word.replace(/'/g,"\\'") + '\')" title="播放读音"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19 11,5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg></span>';
-
-    var html = '<div class="review-progress">' + progress + '</div>';
-    html += '<div class="review-word">' + word.word + speakerIcon + '</div>';
-    if (phon) html += '<div class="review-phon">/' + phon + '/</div>';
+    for (var i = opts.length-1; i > 0; i--) { var j = Math.floor(Math.random()*(i+1)); var t = opts[i]; opts[i] = opts[j]; opts[j] = t; }
+    var spk = '<span class="speaker-icon" onclick="event.stopPropagation();playPronunciation(\'' + w.word.replace(/'/g,"\\'") + '\')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19 11,5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg></span>';
+    var lb = ["A","B","C","D"];
+    var html = '<div class="review-progress">' + (REVIEW_IDX+1) + ' / ' + REVIEW_WORDS.length + '</div>';
+    html += '<div class="review-word-section"><div class="review-word">' + w.word + spk + '</div>';
+    if (phon) html += '<div class="review-phon">/' + phon + '/</div></div>';
     html += '<div class="review-options">';
-
-    var labels = ["A","B","C","D"];
-    for (var i = 0; i < options.length; i++) {
-        var isCorrect = options[i] === correctAns;
-        html += '<div class="review-option" data-correct="' + isCorrect + '" onclick="checkReviewAnswer(this)">';
-        html += '<span class="review-opt-label">' + labels[i] + '</span>';
-        html += '<span class="review-opt-text">' + options[i] + '</span></div>';
+    for (var i = 0; i < opts.length; i++) {
+        html += '<div class="review-option" data-correct="' + (opts[i] === w.meaning) + '" onclick="checkReviewAnswer(this)">';
+        html += '<span class="review-opt-label">' + lb[i] + '</span><span>' + opts[i] + '</span></div>';
     }
-    html += '</div>';
-    html += '<div id="reviewFeedback" class="review-feedback"></div>';
-    html += '<button id="reviewNextBtn" class="action-btn" style="display:none;margin-top:12px;" onclick="nextReviewQuestion()">下一题</button>';
-    quiz.innerHTML = html;
+    html += '</div><div id="reviewFeedback" class="review-feedback"></div>';
+    html += '<button id="reviewNextBtn" class="review-next-btn" style="display:none" onclick="nextReviewQuestion()">下一题</button>';
+    document.getElementById("reviewQuiz").innerHTML = html;
 }
 
 function checkReviewAnswer(el) {
     if (document.querySelector(".review-option.selected")) return;
     el.classList.add("selected");
-    var correct = el.getAttribute("data-correct") === "true";
     REVIEW_TOTAL++;
-    if (correct) {
-        REVIEW_SCORE++;
-        REVIEW_CORRECT.push(REVIEW_WORDS[REVIEW_IDX].word);
+    if (el.getAttribute("data-correct") === "true") {
+        REVIEW_SCORE++; REVIEW_CORRECT.push(REVIEW_WORDS[REVIEW_IDX].word);
         el.classList.add("correct");
-        document.getElementById("reviewFeedback").innerHTML = '<span style="color:#34c759;">✓ 正确！</span>';
+        document.getElementById("reviewFeedback").innerHTML = '<span>✓ 正确！</span>';
     } else {
         el.classList.add("wrong");
-        document.getElementById("reviewFeedback").innerHTML = '<span style="color:#ff3b30;">✗ 正确答案：</span>' + REVIEW_WORDS[REVIEW_IDX].meaning;
-        // Highlight correct answer
-        document.querySelectorAll(".review-option").forEach(function(o) {
-            if (o.getAttribute("data-correct") === "true") o.classList.add("correct");
-        });
+        document.getElementById("reviewFeedback").innerHTML = '<span>正确答案：' + REVIEW_WORDS[REVIEW_IDX].meaning + '</span>';
+        document.querySelectorAll(".review-option").forEach(function(o) { if (o.getAttribute("data-correct") === "true") o.classList.add("correct"); });
     }
     document.getElementById("reviewNextBtn").style.display = "block";
 }
