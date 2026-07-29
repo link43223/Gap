@@ -159,7 +159,22 @@
                 <div class="review-start-icon">📖</div>
                 <div class="review-start-title">Gap 背单词</div>
                 <div class="review-start-sub">每日积累，循序渐进</div>
-                <div id="reviewStartInfo" class="review-start-info"></div>
+                <div class="review-start-settings">
+                    <select id="reviewSourceSelect" onchange="selectReviewSource(this.value)">
+                        <option value="wordbank">单词库</option>
+                        <option value="高中必修1">高中必修1</option>
+                        <option value="高中必修2">高中必修2</option>
+                        <option value="高中必修3">高中必修3</option>
+                        <option value="四级高频">四级高频</option>
+                        <option value="六级高频">六级高频</option>
+                    </select>
+                    <select id="reviewCountSelect" onchange="setReviewCount(parseInt(this.value))">
+                        <option value="10">10</option>
+                        <option value="20" selected>20</option>
+                        <option value="30">30</option>
+                        <option value="50">50</option>
+                    </select>
+                </div>
                 <div class="review-start-btns">
                     <button class="review-start-btn primary" onclick="openReviewStudy()">
                         <span class="rsb-icon">🎯</span>
