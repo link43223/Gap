@@ -458,8 +458,6 @@ function loadArticle(key) {
     if (article.image) {
         imgEl.style.display = "none";
         capEl.style.display = "none";
-        imgEl.src = article.image;
-        imgEl.alt = article.title;
         imgEl.onload = function() {
             imgEl.style.display = "block";
             if (article.imageCaption) {
@@ -471,6 +469,8 @@ function loadArticle(key) {
             imgEl.style.display = "none";
             capEl.style.display = "none";
         };
+        imgEl.src = article.image;
+        imgEl.alt = article.title;
     } else {
         imgEl.style.display = "none";
         capEl.style.display = "none";
