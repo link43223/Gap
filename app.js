@@ -367,7 +367,7 @@ function showTab(tabName) {
 function selectTopic(topic) {
     currentTopic = topic;
     document.querySelectorAll(".topic-btn").forEach(function(btn) { btn.classList.remove("active"); });
-    var topics = ["science", "health", "life", "culture", "nature"];
+    var topics = ["science", "health", "life", "culture", "nature", "sports", "gaming"];
     var buttons = document.querySelectorAll(".topic-btn");
     var idx = topics.indexOf(topic);
     if (idx >= 0) buttons[idx].classList.add("active");
@@ -519,7 +519,7 @@ function clearSearch() {
 function searchArticles(query) {
     var q = query.toLowerCase();
     var results = [];
-    var TOPIC_NAMES = { "science": "科学科技", "health": "健康", "life": "生活", "culture": "文化", "nature": "自然" };
+    var TOPIC_NAMES = { "science": "科学科技", "health": "健康", "life": "生活", "culture": "文化", "nature": "自然", "sports": "体育", "gaming": "游戏" };
     for (var key in articles) {
         var a = articles[key];
         var inTitle = a.title.toLowerCase().indexOf(q) !== -1;
