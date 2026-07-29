@@ -988,8 +988,10 @@ var REVIEW_BG = ["linear-gradient(135deg,#667eea,#764ba2)","linear-gradient(135d
 function renderReviewQuestion() {
     if (REVIEW_IDX >= REVIEW_WORDS.length) { showReviewResult(); return; }
     var w = REVIEW_WORDS[REVIEW_IDX];
-    document.getElementById("reviewBg").style.background = REVIEW_BG[REVIEW_IDX % REVIEW_BG.length];
+    document.getElementById("reviewProgress").textContent = (REVIEW_IDX+1) + " / " + REVIEW_WORDS.length;
+    document.getElementById("reviewWordEl").textContent = w.word;
     var phon = window.PHONETIC && PHONETIC[w.word.toLowerCase()] || "";
+    document.getElementById("reviewPhonEl").textContent = phon ? "/" + phon + "/" : "";
     var opts = [w.meaning];
     var pool = REVIEW_WORDS.filter(function(x) { return x.meaning && x.meaning !== w.meaning; });
     var allM = Object.values(ZH_DICT || {}).filter(function(m) { return m && m !== w.meaning; });
@@ -1000,19 +1002,16 @@ function renderReviewQuestion() {
         if (opts.indexOf(p) === -1 && p) opts.push(p);
     }
     for (var i = opts.length-1; i > 0; i--) { var j = Math.floor(Math.random()*(i+1)); var t = opts[i]; opts[i] = opts[j]; opts[j] = t; }
-    var spk = '<span class="speaker-icon" onclick="event.stopPropagation();playPronunciation(\'' + w.word.replace(/'/g,"\\'") + '\')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19 11,5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg></span>';
-    var lb = ["A","B","C","D"];
-    var html = '<div class="review-progress">' + (REVIEW_IDX+1) + ' / ' + REVIEW_WORDS.length + '</div>';
-    html += '<div class="review-word-section"><div class="review-word">' + w.word + spk + '</div>';
-    if (phon) html += '<div class="review-phon">/' + phon + '/</div></div>';
-    html += '<div class="review-options">';
+    var labels = ["A","B","C","D"];
+    var html = "";
     for (var i = 0; i < opts.length; i++) {
         html += '<div class="review-option" data-correct="' + (opts[i] === w.meaning) + '" onclick="checkReviewAnswer(this)">';
-        html += '<span class="review-opt-label">' + lb[i] + '</span><span>' + opts[i] + '</span></div>';
+        html += '<span class="review-opt-label">' + labels[i] + '</span><span>' + opts[i] + '</span></div>';
     }
-    html += '</div><div id="reviewFeedback" class="review-feedback"></div>';
-    html += '<button id="reviewNextBtn" class="review-next-btn" style="display:none" onclick="nextReviewQuestion()">下一题</button>';
-    document.getElementById("reviewQuiz").innerHTML = html;
+    document.getElementById("reviewOptions").innerHTML = html;
+    document.getElementById("reviewFeedback").textContent = "";
+    document.getElementById("reviewNextBtn").style.display = "none";
+    setTimeout(function() { playPronunciation(w.word); }, 300);
 }
 
 function checkReviewAnswer(el) {
@@ -1038,18 +1037,19 @@ function nextReviewQuestion() {
 
 function showReviewResult() {
     document.getElementById("reviewQuiz").style.display = "none";
-    document.getElementById("reviewResult").style.display = "block";
+    document.getElementById("reviewResult").style.display = "flex";
     var pct = REVIEW_TOTAL > 0 ? Math.round(REVIEW_SCORE / REVIEW_TOTAL * 100) : 0;
-    var msg = pct >= 80 ? "太棒了！" : pct >= 60 ? "不错，继续加油！" : "再练练吧！";
+    var msg = pct >= 80 ? "太棒了！" : pct >= 60 ? "不错！" : "再练练！";
     var html = '<div class="review-result-score">' + REVIEW_SCORE + '/' + REVIEW_TOTAL + '</div>';
-    html += '<div class="review-result-pct">' + pct + '% ' + msg + '</div>';
+    html += '<div class="review-result-pct">' + pct + '%</div>';
+    html += '<div class="review-result-msg">' + msg + '</div>';
     if (REVIEW_CORRECT.length) {
-        html += '<div class="review-result-detail"><p>答对的词：</p>';
+        html += '<div class="review-result-words">';
         REVIEW_CORRECT.forEach(function(w) { html += '<span class="review-result-word">' + w + '</span> '; });
         html += '</div>';
     }
-    html += '<button class="action-btn" onclick="startReview()" style="margin-top:16px;">再来一轮</button>';
-    html += '<button class="action-btn secondary" onclick="closeReview()" style="margin-top:8px;">返回</button>';
+    html += '<button class="review-result-btn primary" onclick="startReview()">再来一轮</button>';
+    html += '<button class="review-result-btn secondary" onclick="closeReview()">返回</button>';
     document.getElementById("reviewResult").innerHTML = html;
 }
 
