@@ -302,12 +302,24 @@ body.dark .topic-label {
 }
 
 .article-title-cn {
-    font-size: 14px;
-    color: #8e8e93;
+    font-size: 20px;
+    color: #1a1a2e;
     margin: 2px 0 10px;
-    line-height: 1.3;
-    letter-spacing: 0.5px;
+    line-height: 1.4;
+    font-weight: 600;
 }
+
+body.dark .article-title-cn { color: #e5e5ea; }
+
+.ali-title-cn {
+    font-size: 18px;
+    color: #1a1a2e;
+    margin-bottom: 2px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+body.dark .ali-title-cn { color: #e5e5ea; }
 
 .bookmark-article-btn {
     flex-shrink: 0;
@@ -877,8 +889,6 @@ body.dark .toggle-slider { background-color: #444; }
 body.dark .topic-label { color: #999; }
 body.dark .speaker-icon { background: #1e3a5f; color: #4da3ff; }
 body.dark .article-title-row h2 { color: #e5e5ea; }
-body.dark .article-title-cn { color: #aeaeb2; }
-body.dark .ali-title-cn { color: #aeaeb2; }
 body.dark .nav-arrow { background: #333; color: #4da3ff; border-color: #444; }
 
 /* === 手机 === */
