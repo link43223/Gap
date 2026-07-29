@@ -459,6 +459,7 @@ function loadArticle(key) {
         imgEl.style.display = "none";
         capEl.style.display = "none";
         imgEl.onload = function() {
+            imgEl.classList.add("loaded");
             imgEl.style.display = "block";
             if (article.imageCaption) {
                 capEl.textContent = article.imageCaption;
