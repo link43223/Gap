@@ -945,25 +945,12 @@ function exportWords() {
 // ==========================================
 // 背单词
 // ==========================================
-var REVIEW_SOURCE = "wordbank";
-
-function changeWordBank() {
-    var banks = ["wordbank", "高中必修1", "高中必修2", "高中必修3", "四级高频", "六级高频"];
-    var idx = banks.indexOf(REVIEW_SOURCE);
-    REVIEW_SOURCE = banks[(idx + 1) % banks.length];
-    updateReviewInfo();
-}
-
 function updateReviewInfo() {
-    var labels = { "wordbank": "单词库", "高中必修1": "必修1", "高中必修2": "必修2", "高中必修3": "必修3", "四级高频": "四级高频", "六级高频": "六级高频" };
-    document.getElementById("reviewBankName").textContent = labels[REVIEW_SOURCE] || REVIEW_SOURCE;
-    var total = 0;
-    if (REVIEW_SOURCE === "wordbank") total = getWordBank().length;
-    else if (window.WORD_DATA && WORD_DATA[REVIEW_SOURCE]) total = WORD_DATA[REVIEW_SOURCE].length;
-    var done = parseInt(localStorage.getItem("gap_review_done_" + REVIEW_SOURCE) || "0");
-    document.getElementById("reviewStats").textContent = done + "/" + total;
-    document.getElementById("reviewFill").style.width = total > 0 ? (done / total * 100) + "%" : "0%";
+    var now = new Date();
+    var days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+    var months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    document.getElementById("reviewDateCn").textContent = now.getFullYear() + "年" + (now.getMonth()+1) + "月" + now.getDate() + "日";
+    document.getElementById("reviewDateEn").textContent = days[now.getDay()] + ", " + months[now.getMonth()] + " " + now.getDate();
 }
-
 function startStudy() { alert("学习功能即将上线"); }
 function startReview() { alert("复习功能即将上线"); }
