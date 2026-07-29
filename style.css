@@ -21,7 +21,7 @@ body {
 .container {
     max-width: 720px;
     margin: 0 auto;
-    padding: 12px 16px 40px;
+    padding: 12px 16px 80px;
 }
 
 /* === 顶部 === */
@@ -895,6 +895,35 @@ body.dark .topic-label { color: #999; }
 body.dark .speaker-icon { background: #1e3a5f; color: #4da3ff; }
 body.dark .article-title-row h2 { color: #e5e5ea; }
 body.dark .nav-arrow { background: #333; color: #4da3ff; border-color: #444; }
+
+/* === 底部导航栏 === */
+.bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    height: 60px;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(0,0,0,0.06);
+    display: flex; justify-content: space-around; align-items: center;
+    z-index: 200;
+    padding-bottom: env(safe-area-inset-bottom, 4px);
+}
+.nav-item {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 2px; height: 100%;
+    border: none; background: none; cursor: pointer;
+    font-family: inherit; color: #aeaeb2; transition: color 0.2s;
+    padding: 0;
+}
+.nav-item.active { color: var(--accent); }
+.nav-icon { width: 22px; height: 22px; }
+.nav-label { font-size: 11px; font-weight: 500; line-height: 1; }
+body.dark .bottom-nav {
+    background: rgba(26,26,46,0.92);
+    border-top-color: rgba(255,255,255,0.06);
+}
+body.dark .nav-item { color: #666; }
+body.dark .nav-item.active { color: #4da3ff; }
 
 /* === 背单词 - 卡片式 === */
 #review-panel { padding: 0 !important; }

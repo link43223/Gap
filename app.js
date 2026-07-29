@@ -128,10 +128,10 @@ function toggleDropdown() {
 
 function menuAction(action) {
     document.getElementById("dropdown").classList.remove("show");
-    if (action === "read") showArticleList(currentTopic);
+    if (action === "read") switchTab("read");
     else if (action === "wordbank") showTab("wordbank");
     else if (action === "bookmarks") showTab("bookmarks");
-    else if (action === "review") showTab("review");
+    else if (action === "review") switchTab("review");
 }
 
 function toggleShowEn() {
@@ -366,9 +366,23 @@ function showTab(tabName) {
     document.getElementById("wordbank-panel").style.display = (tabName === "wordbank") ? "block" : "none";
     document.getElementById("bookmarks-panel").style.display = (tabName === "bookmarks") ? "block" : "none";
     document.getElementById("review-panel").style.display = (tabName === "review") ? "block" : "none";
+    document.getElementById("daily-panel").style.display = (tabName === "daily") ? "block" : "none";
     document.getElementById("topic-bar").style.display = (tabName === "read") ? "flex" : "none";
     if (tabName === "wordbank") renderWordBank();
     if (tabName === "bookmarks") renderBookmarks();
+    document.querySelectorAll(".nav-item").forEach(function(b) { b.classList.remove("active"); });
+    var map = { read: 0, daily: 1, review: 2 };
+    var idx = map[tabName];
+    if (idx !== undefined) {
+        var items = document.querySelectorAll(".nav-item");
+        if (items[idx]) items[idx].classList.add("active");
+    }
+}
+
+function switchTab(tabName) {
+    showTab(tabName);
+    if (tabName === "read") showArticleList(currentTopic);
+    else if (tabName === "daily") showDailyPick();
 }
 
 // ==========================================
@@ -1060,6 +1074,24 @@ function checkReviewAnswer(el) {
 function nextReviewQuestion() {
     REVIEW_IDX++;
     renderReviewQuestion();
+}
+
+function showDailyPick() {
+    showTab("daily");
+    var div = document.getElementById("dailyContent");
+    var keys = Object.keys(articles);
+    var key = keys[Math.floor(Math.random() * keys.length)];
+    var a = articles[key];
+    if (!a) { div.innerHTML = "<p>暂无内容</p>"; return; }
+    var topics = {science:"科学科技",health:"健康",life:"生活",culture:"文化",nature:"自然",sports:"体育",gaming:"游戏"};
+    var t = key.split("-")[0];
+    var topicName = topics[t] || t;
+    div.innerHTML = '<div style="margin-bottom:16px;"><span style="font-size:13px;color:#aeaeb2;">今日推荐</span></div>' +
+        '<div style="font-size:20px;font-weight:600;color:#1a1a2e;margin-bottom:4px;">' + a.title + '</div>' +
+        (a.titleCn ? '<div style="font-size:18px;font-weight:700;color:#1a1a2e;margin-bottom:8px;">' + a.titleCn + '</div>' : '') +
+        '<div style="font-size:12px;color:#aeaeb2;margin-bottom:12px;">话题：' + topicName + '</div>' +
+        '<div style="font-size:15px;color:#3a3a3c;line-height:1.8;">' + a.text.substring(0, 300) + '…</div>' +
+        '<button class="action-btn" style="margin-top:16px;" onclick="openArticle(\'' + key + '\');showTab(\'read\');">阅读全文</button>';
 }
 
 function showReviewResult() {
