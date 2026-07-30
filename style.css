@@ -660,6 +660,71 @@ body.dark .ali-title-cn { color: #e5e5ea; }
     padding: 6px;
 }
 
+/* === 岛式单词库 === */
+.word-island {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+.word-island-header {
+    padding: 14px 16px 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent);
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f5;
+    transition: background 0.15s;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.word-island-header:hover { background: #fafafc; }
+.word-island-header:active { background: #f0f0f5; }
+
+.word-island-body {
+    padding: 4px 12px 12px;
+}
+
+.word-island-body .word-item-wrapper {
+    margin-bottom: 0;
+}
+
+.word-island-body .word-item {
+    padding: 10px 12px;
+}
+
+body.dark .word-island { background: #252540; }
+body.dark .word-island-header { border-color: #333; color: #4da3ff; }
+body.dark .word-island-header:hover { background: #1e1e35; }
+
+/* 单词删除动画：向左滑出 + 折叠 */
+.word-item-wrapper.deleting {
+    transform: translateX(-120%);
+    opacity: 0;
+    max-height: 0 !important;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    overflow: hidden;
+    border-radius: 12px;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 岛删除动画：淡出 + 折叠 */
+.word-island.deleting {
+    opacity: 0;
+    max-height: 0 !important;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    overflow: hidden;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 /* === 开关 === */
 .toggle-switch {
     position: relative;

@@ -30,25 +30,36 @@ var audioCache = {};
 // ==========================================
 function getWordBank() {
     var data = localStorage.getItem("gap_wordbank");
-    return data ? JSON.parse(data) : [];
+    var bank = data ? JSON.parse(data) : [];
+    // 兼容旧数据：没 articleKey 的归到"其他文章"
+    var changed = false;
+    bank.forEach(function(item) {
+        if (!item.articleKey) {
+            item.articleKey = "_other";
+            item.articleTitle = item.articleTitle || "其他文章";
+            changed = true;
+        }
+    });
+    if (changed) localStorage.setItem("gap_wordbank", JSON.stringify(bank));
+    return bank;
 }
 
-function addToWordBank(word, meaning) {
+function addToWordBank(word, meaning, articleKey, articleTitle) {
     var bank = getWordBank();
-    if (!bank.find(function(item) { return item.word === word; })) {
-        bank.unshift({ word: word, meaning: meaning, time: new Date().toISOString() });
+    if (!bank.find(function(item) { return item.word === word && item.articleKey === articleKey; })) {
+        bank.unshift({ word: word, meaning: meaning, time: new Date().toISOString(), articleKey: articleKey, articleTitle: articleTitle });
         localStorage.setItem("gap_wordbank", JSON.stringify(bank));
     }
 }
 
-function removeFromWordBank(word) {
+function removeFromWordBank(word, articleKey) {
     var bank = getWordBank();
-    bank = bank.filter(function(item) { return item.word !== word; });
+    bank = bank.filter(function(item) { return !(item.word === word && item.articleKey === articleKey); });
     localStorage.setItem("gap_wordbank", JSON.stringify(bank));
 }
 
-function isInWordBank(word) {
-    return getWordBank().some(function(item) { return item.word === word; });
+function isInWordBank(word, articleKey) {
+    return getWordBank().some(function(item) { return item.word === word && item.articleKey === articleKey; });
 }
 
 // ==========================================
@@ -599,7 +610,7 @@ async function lookupWord(word, element) {
     popup.classList.add("show");
     document.getElementById("overlay").style.display = "block";
     var saveBtn = document.getElementById("saveWordBtn");
-    if (isInWordBank(word)) {
+    if (isInWordBank(word, currentArticleKey)) {
         saveBtn.textContent = "✓ 已在单词库中"; saveBtn.className = "action-btn saved"; saveBtn.onclick = removeSavedWord;
     } else {
         saveBtn.textContent = "+ 加入单词库"; saveBtn.className = "action-btn"; saveBtn.onclick = saveWord;
@@ -780,7 +791,9 @@ function highlightSentence(wordEl) {
 // ==========================================
 function saveWord() {
     if (!currentWord) return;
-    addToWordBank(currentWord, document.getElementById("popupMeaning").textContent);
+    var article = articles[currentArticleKey];
+    var title = article ? article.title : "未知文章";
+    addToWordBank(currentWord, document.getElementById("popupMeaning").textContent, currentArticleKey, title);
     var btn = document.getElementById("saveWordBtn");
     btn.textContent = "✓ 已在单词库中"; btn.className = "action-btn saved"; btn.onclick = removeSavedWord;
     if (currentWordElement) currentWordElement.classList.add("known");
@@ -788,7 +801,7 @@ function saveWord() {
 
 function removeSavedWord() {
     if (!currentWord) return;
-    removeFromWordBank(currentWord);
+    removeFromWordBank(currentWord, currentArticleKey);
     var btn = document.getElementById("saveWordBtn");
     btn.textContent = "+ 加入单词库"; btn.className = "action-btn"; btn.onclick = saveWord;
     if (currentWordElement) currentWordElement.classList.remove("known");
@@ -857,7 +870,7 @@ document.getElementById("overlay").addEventListener("click", function(e) {
 });
 
 // ==========================================
-// 单词库渲染
+// 单词库渲染（岛式分组）
 // ==========================================
 function renderWordBank() {
     var bank = getWordBank();
@@ -865,23 +878,58 @@ function renderWordBank() {
     var emptyHint = document.getElementById("emptyHint");
     if (bank.length === 0) { listDiv.innerHTML = ""; emptyHint.style.display = "block"; return; }
     emptyHint.style.display = "none";
-    listDiv.innerHTML = bank.map(function(item, i) {
-        return '<div class="word-item-wrapper"><div class="word-item-row"><div class="word-item-delete" onclick="deleteWord(' + i + ')">删除</div>' +
-            '<div class="word-item" id="wi-' + i + '"><span class="eng">' + item.word + '</span>' +
-            '<div class="word-item-right"><button class="meaning-toggle-btn" onclick="toggleWordMeaning(' + i + ',this)">释义</button></div></div></div>' +
-            '<div class="word-meaning" id="wm-' + i + '">' + (item.meaning || "") + '</div></div>';
-    }).join("");
+
+    // 按文章分组
+    var groups = {};
+    bank.forEach(function(item) {
+        var key = item.articleKey || "_other";
+        if (!groups[key]) {
+            groups[key] = { articleKey: key, articleTitle: item.articleTitle || "其他文章", words: [] };
+        }
+        groups[key].words.push(item);
+    });
+
+    // 按最新单词时间排序（岛）
+    var sortedGroups = Object.values(groups).sort(function(a, b) {
+        return (b.words[0].time || "").localeCompare(a.words[0].time || "");
+    });
+
+    // 渲染岛
+    var html = "";
+    sortedGroups.forEach(function(group) {
+        // 编码 articleKey 和 articleTitle 用于 HTML
+        var safeKey = group.articleKey.replace(/'/g, "\\'");
+        var safeTitle = group.articleTitle.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+        html += '<div class="word-island">';
+        html += '<div class="word-island-header" onclick="openArticle(\'' + safeKey + '\')">📖 ' + safeTitle + '</div>';
+        html += '<div class="word-island-body">';
+        group.words.forEach(function(item) {
+            var safeWord = item.word.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+            html += '<div class="word-item-wrapper"><div class="word-item-row">' +
+                '<div class="word-item-delete" onclick="deleteWord(this)">删除</div>' +
+                '<div class="word-item" data-word="' + safeWord + '" data-article="' + safeKey + '">' +
+                '<span class="eng">' + item.word + '</span>' +
+                '<div class="word-item-right"><button class="meaning-toggle-btn" onclick="toggleWordMeaning(this)">释义</button></div>' +
+                '</div></div>' +
+                '<div class="word-meaning">' + (item.meaning || "") + '</div></div>';
+        });
+        html += '</div></div>';
+    });
+
+    listDiv.innerHTML = html;
     bindSwipeEvents();
 }
 
-function toggleWordMeaning(index, btn) {
-    var div = document.getElementById("wm-" + index);
-    if (div.classList.contains("open")) { div.classList.remove("open"); btn.textContent = "释义"; }
-    else { div.classList.add("open"); btn.textContent = "收起"; }
+function toggleWordMeaning(btn) {
+    var wrapper = btn.closest(".word-item-wrapper");
+    var meaning = wrapper.querySelector(".word-meaning");
+    var isOpen = meaning.classList.contains("open");
+    meaning.classList.toggle("open");
+    btn.textContent = isOpen ? "释义" : "收起";
 }
 
 // 左滑删除
-var swipeState = { el: null, startX: 0, moved: false };
+var swipeState = { el: null, startX: 0, startY: 0, moved: false };
 function bindSwipeEvents() {
     document.querySelectorAll("#wordList .word-item").forEach(function(item) {
         item.removeEventListener("touchstart", onSwipeStart); item.removeEventListener("touchmove", onSwipeMove);
@@ -896,8 +944,19 @@ function resetAllSwipes() {
     document.querySelectorAll("#wordList .word-item-wrapper").forEach(function(w) { w.classList.remove("swiped"); });
     document.querySelectorAll("#wordList .word-item").forEach(function(el) { el.style.transform = "translateX(0)"; });
 }
-function onSwipeStart(e) { resetAllSwipes(); swipeState.el = e.currentTarget; swipeState.startX = e.touches[0].clientX; swipeState.moved = false; }
-function onSwipeMove(e) { if (!swipeState.el) return; e.preventDefault(); var dx = e.touches[0].clientX - swipeState.startX; if (dx < -5) { swipeState.moved = true; swipeState.el.style.transform = "translateX(" + Math.max(dx, -80) + "px)"; } }
+function onSwipeStart(e) { resetAllSwipes(); swipeState.el = e.currentTarget; swipeState.startX = e.touches[0].clientX; swipeState.startY = e.touches[0].clientY; swipeState.moved = false; }
+function onSwipeMove(e) {
+    if (!swipeState.el) return;
+    var dx = e.touches[0].clientX - swipeState.startX;
+    var dy = Math.abs(e.touches[0].clientY - swipeState.startY);
+    // 水平滑动占主导时才阻止滚动（左滑删除）
+    if (Math.abs(dx) > dy && dx < -5) {
+        e.preventDefault();
+        swipeState.moved = true;
+        swipeState.el.style.transform = "translateX(" + Math.max(dx, -80) + "px)";
+    }
+    // 垂直滑动：不阻止，让页面自然滚动
+}
 function onSwipeEnd() {
     if (!swipeState.el) return;
     var el = swipeState.el, wrapper = el.closest(".word-item-wrapper");
@@ -905,20 +964,69 @@ function onSwipeEnd() {
     swipeState.el = null; swipeState.moved = false;
 }
 function onMouseStart(e) {
-    resetAllSwipes(); var el = e.currentTarget, startX = e.clientX, moved = false;
-    function mm(ev) { var dx = ev.clientX - startX; if (dx < -5) { moved = true; el.style.transform = "translateX(" + Math.max(dx, -80) + "px)"; } }
+    resetAllSwipes(); var el = e.currentTarget, startX = e.clientX, startY = e.clientY, moved = false;
+    function mm(ev) {
+        var dx = ev.clientX - startX;
+        var dy = Math.abs(ev.clientY - startY);
+        if (Math.abs(dx) > dy && dx < -5) { moved = true; el.style.transform = "translateX(" + Math.max(dx, -80) + "px)"; }
+    }
     function mu() { document.removeEventListener("mousemove", mm); document.removeEventListener("mouseup", mu); var wrapper = el.closest(".word-item-wrapper"); if (moved) { var cx = parseFloat(el.style.transform.replace(/[^-\d.]/g, "")) || 0; if (cx < -40) { el.style.transform = "translateX(-80px)"; if (wrapper) wrapper.classList.add("swiped"); } else { el.style.transform = "translateX(0)"; if (wrapper) wrapper.classList.remove("swiped"); } } }
     document.addEventListener("mousemove", mm); document.addEventListener("mouseup", mu);
 }
-function deleteWord(index) {
-    var bank = getWordBank(); bank.splice(index, 1);
-    localStorage.setItem("gap_wordbank", JSON.stringify(bank));
-    renderWordBank(); loadArticle(currentArticleKey);
+function deleteWord(btn) {
+    var wrapper = btn.closest(".word-item-wrapper");
+    var item = wrapper.querySelector(".word-item");
+    var word = item.dataset.word;
+    var articleKey = item.dataset.article;
+
+    // 检查是不是岛的最后一个单词
+    var bank = getWordBank();
+    var groupWords = bank.filter(function (i) { return i.articleKey === articleKey; });
+    var isLastWord = groupWords.length <= 1;
+
+    if (isLastWord) {
+        // 最后一个单词 → 整个岛淡出折叠
+        var island = wrapper.closest(".word-island");
+        var islandH = island.offsetHeight;
+        island.style.maxHeight = islandH + "px";
+        island.style.transition = "none";
+        void island.offsetWidth;
+        island.style.transition = "";
+        island.classList.add("deleting");
+    } else {
+        // 单词滑出 + 折叠
+        var h = wrapper.offsetHeight;
+        wrapper.style.maxHeight = h + "px";
+        wrapper.style.transition = "none";
+        void wrapper.offsetWidth;
+        wrapper.style.transition = "";
+        wrapper.classList.add("deleting");
+    }
+
+    // 动画结束后再真正删除数据
+    setTimeout(function () {
+        bank = getWordBank();
+        bank = bank.filter(function (i) { return !(i.word === word && i.articleKey === articleKey); });
+        localStorage.setItem("gap_wordbank", JSON.stringify(bank));
+        renderWordBank();
+        loadArticle(currentArticleKey);
+    }, 380);
 }
 function exportWords() {
     var bank = getWordBank(); if (!bank.length) return;
     var text = "我的单词库 - Gap\n==============================\n\n";
-    bank.forEach(function(item) { text += item.word + "\n  " + item.meaning + "\n\n"; });
+    // 按文章分组导出
+    var groups = {};
+    bank.forEach(function(item) {
+        var key = item.articleKey || "_other";
+        if (!groups[key]) groups[key] = { title: item.articleTitle || "其他文章", words: [] };
+        groups[key].words.push(item);
+    });
+    for (var k in groups) {
+        text += "📖 " + groups[k].title + "\n";
+        groups[k].words.forEach(function(item) { text += "  " + item.word + "  " + item.meaning + "\n"; });
+        text += "\n";
+    }
     var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], {type:"text/plain"})); a.download = "gap-wordbank.txt"; a.click();
 }
 
