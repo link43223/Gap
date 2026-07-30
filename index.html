@@ -91,9 +91,7 @@
                         <span>英文释义</span>
                         <label class="toggle-switch"><input type="checkbox" id="showEnToggle" checked onchange="toggleShowEn()"><span class="toggle-slider"></span></label>
                     </div>
-                    <div class="dropdown-divider admin-only"></div>
-                    <button class="dropdown-item admin-only" onclick="openAdmin()">🔧 管理</button>
-                </div>
+                                    </div>
             </div>
         </div>
     </header>
@@ -156,18 +154,7 @@
         <div id="dailyContent" class="article-content" style="padding:16px 0;line-height:1.8;"></div>
     </div>
 
-    <div id="admin-panel" class="panel" style="display:none;">
-        <div class="panel-header"><h2>管理后台</h2><button class="text-btn" onclick="closeAdmin()">关闭</button></div>
-        <div id="adminContent">
-            <div id="adminKeyScreen" style="text-align:center;padding:40px 0;">
-                <p style="margin-bottom:16px;color:#8e8e93;">请输入管理密钥</p>
-                <input type="password" id="adminKeyInput" placeholder="输入密钥" style="padding:10px 16px;border:1px solid #e5e5ea;border-radius:10px;font-size:15px;font-family:inherit;width:200px;">
-                <button class="action-btn" style="margin-top:12px;" onclick="verifyAdminKey()">确认</button>
-                <p id="adminKeyError" style="color:#ff3b30;margin-top:8px;display:none;"></p>
-            </div>
-            <div id="adminPanelMain" style="display:none;">
-                <div id="adminTopics" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;"></div>
-                <div id="adminArticleList" style="max-height:300px;overflow-y:auto;margin-bottom:16px;"></div>
+    
                 <div id="adminEditor" style="display:none;">
                     <input id="adminEditKey" type="hidden">
                     <div style="margin-bottom:8px;"><label style="font-size:13px;color:#8e8e93;">标题</label><input id="adminEditTitle" style="width:100%;padding:8px 12px;border:1px solid #e5e5ea;border-radius:8px;font-size:14px;font-family:inherit;"></div>
