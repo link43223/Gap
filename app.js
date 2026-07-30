@@ -968,7 +968,7 @@ function openAdmin() {
 function closeAdmin() { showTab("read"); }
 function verifyAdminKey() {
     var key = document.getElementById("adminKeyInput").value;
-    fetch("/verify-key", {method:"POST",body:JSON.stringify({key:key}),headers:{"Content-Type":"application/json"}})
+    fetch("http://localhost:3002/verify-key", {method:"POST",body:JSON.stringify({key:key}),headers:{"Content-Type":"application/json"}})
     .then(function(r){return r.json();}).then(function(d){
         if (d.ok) { document.getElementById("adminKeyScreen").style.display = "none"; document.getElementById("adminPanelMain").style.display = "block"; loadAdminArticleList(); }
         else { document.getElementById("adminKeyError").textContent = "密钥错误"; document.getElementById("adminKeyError").style.display = "block"; }
@@ -1010,7 +1010,7 @@ function adminSave(){
     if(img)d.image=img;
     var btn=document.querySelector("#adminEditor .action-btn");
     btn.disabled=true;btn.textContent="保存中...";
-    fetch("/save",{method:"POST",body:JSON.stringify(d),headers:{"Content-Type":"application/json"}})
+    fetch("http://localhost:3002/save",{method:"POST",body:JSON.stringify(d),headers:{"Content-Type":"application/json"}})
     .then(function(r){return r.json();})
     .then(function(r){
         if(r.ok){document.getElementById("adminSaveStatus").textContent="✅ "+r.message;var s=document.createElement("script");s.src="articles.js?"+Date.now();s.onload=function(){adminEditArticle(k);};document.head.appendChild(s);}
