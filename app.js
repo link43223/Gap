@@ -131,7 +131,7 @@ function menuAction(action) {
     if (action === "read") switchTab("read");
     else if (action === "wordbank") showTab("wordbank");
     else if (action === "bookmarks") showTab("bookmarks");
-    else if (action === "review") switchTab("review");
+    else if (action === "review") showTab("read");
 }
 
 function toggleShowEn() {
@@ -357,26 +357,16 @@ function showTab(tabName) {
     document.getElementById("read-panel").style.display = (tabName === "read") ? "block" : "none";
     document.getElementById("wordbank-panel").style.display = (tabName === "wordbank") ? "block" : "none";
     document.getElementById("bookmarks-panel").style.display = (tabName === "bookmarks") ? "block" : "none";
-    document.getElementById("review-panel").style.display = (tabName === "review") ? "block" : "none";
     document.getElementById("daily-panel").style.display = (tabName === "daily") ? "block" : "none";
-    document.getElementById("admin-panel").style.display = (tabName === "admin") ? "block" : "none";
     document.getElementById("topic-bar").style.display = (tabName === "read") ? "flex" : "none";
     if (tabName === "wordbank") renderWordBank();
     if (tabName === "bookmarks") renderBookmarks();
-    document.querySelectorAll(".nav-item").forEach(function(b) { b.classList.remove("active"); });
-    var map = { read: 0, daily: 1, review: 2 };
-    var idx = map[tabName];
-    if (idx !== undefined) {
-        var items = document.querySelectorAll(".nav-item");
-        if (items[idx]) items[idx].classList.add("active");
-    }
 }
 
 function switchTab(tabName) {
     showTab(tabName);
     if (tabName === "read") showArticleList(currentTopic);
     else if (tabName === "daily") showDailyPick();
-    else if (tabName === "review") updateReviewInfo();
 }
 
 // ==========================================
