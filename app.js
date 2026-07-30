@@ -294,14 +294,6 @@ document.addEventListener("click", function(e) {
     if (!e.target.closest("#fontSelectWrap") && !e.target.closest("#fontPicker")) {
         document.getElementById("fontPicker").classList.remove("show");
     }
-    if (!e.target.closest("#reviewSourceWrap") && !e.target.closest("#reviewSourcePicker")) {
-        var el = document.getElementById("reviewSourcePicker");
-        if (el) el.classList.remove("show");
-    }
-    if (!e.target.closest("#reviewCountWrap") && !e.target.closest("#reviewCountPicker")) {
-        var el = document.getElementById("reviewCountPicker");
-        if (el) el.classList.remove("show");
-    }
 });
 
 function initAccent() {
@@ -946,12 +938,3 @@ function exportWords() {
 // ==========================================
 // 背单词
 // ==========================================
-function updateReviewInfo() {
-    var now = new Date();
-    var days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-    var months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-    document.getElementById("reviewDateCn").textContent = now.getFullYear() + "年" + (now.getMonth()+1) + "月" + now.getDate() + "日";
-    document.getElementById("reviewDateEn").textContent = days[now.getDay()] + ", " + months[now.getMonth()] + " " + now.getDate();
-}
-function startStudy() { alert("学习功能即将上线"); }
-function startReview() { alert("复习功能即将上线"); }

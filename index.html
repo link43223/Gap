@@ -17,7 +17,7 @@
     <header>
         <h1>Gap</h1>
         <div class="header-right">
-            <button class="icon-btn" onclick="menuAction('review')" title="背单词">📖</button><button class="icon-btn bookmark-header-btn" onclick="menuAction('bookmarks')" title="收藏">★</button>
+            <button class="icon-btn bookmark-header-btn" onclick="menuAction('bookmarks')" title="收藏">★</button>
             <div class="dropdown-wrapper">
                 <button class="icon-btn" onclick="toggleSettings()" title="排版">⚙</button>
                 <div id="settingsDropdown" class="dropdown settings-dropdown">
@@ -170,21 +170,7 @@
         </div>
     </div>
 
-        <div id="review-panel" class="panel" style="display:none;">
-        <div id="reviewArea" class="review-area">
-            <div class="review-date">
-                <div class="review-date-cn" id="reviewDateCn">2026年7月29日</div>
-                <div class="review-date-en" id="reviewDateEn">Wednesday, July 29</div>
-            </div>
-            <div class="review-actions">
-                <div class="review-action study" onclick="startStudy()">学习</div>
-                <div class="review-action review" onclick="startReview()">复习</div>
-            </div>
-        </div>
-    </div>
-
-    
-    <div id="wordPopup" class="word-popup">
+        wordPopup" class="word-popup">
         <div class="popup-header"><strong id="popupWord"></strong><button class="icon-btn close-btn" onclick="closePopup()">×</button></div>
         <div id="popupMeaning"></div>
         <div class="popup-actions">

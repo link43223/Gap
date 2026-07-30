@@ -896,37 +896,3 @@ body.dark .speaker-icon { background: #1e3a5f; color: #4da3ff; }
 body.dark .article-title-row h2 { color: #e5e5ea; }
 body.dark .nav-arrow { background: #333; color: #4da3ff; border-color: #444; }
 
-/* === 背单词 === */
-#review-panel { padding: 0 !important; margin: -12px -16px 0; }
-.review-area {
-    height: calc(100vh - 60px); display: flex; flex-direction: column;
-    background: #f5f5f7; padding: 40px 24px; position: relative;
-}
-.review-date {
-    flex: 1; display: flex; flex-direction: column;
-    justify-content: center; align-items: center;
-}
-.review-date-cn {
-    font-size: 32px; font-weight: 400; color: #1a1a2e;
-    font-family: 'EB Garamond', 'Noto Serif SC', 'STSong', serif;
-    letter-spacing: 4px; margin-bottom: 8px;
-}
-.review-date-en {
-    font-size: 15px; color: #aeaeb2; font-weight: 400;
-    font-family: 'EB Garamond', serif; font-style: italic;
-    letter-spacing: 1px;
-}
-.review-actions {
-    display: flex; gap: 16px; padding: 20px 0 40px;
-}
-.review-action {
-    flex: 1; padding: 18px; border-radius: 14px; text-align: center;
-    font-size: 17px; font-weight: 600; cursor: pointer;
-    font-family: inherit; transition: transform 0.15s;
-}
-.review-action:active { transform: scale(0.95); }
-.review-action.study { background: var(--accent); color: white; border: none; }
-.review-action.review { background: white; color: var(--accent); border: 1.5px solid var(--accent); }
-body.dark .review-area { background: #1a1a2e; }
-body.dark .review-date-cn { color: #e5e5ea; }
-body.dark .review-action.review { background: #252540; color: #4da3ff; border-color: #4da3ff; }body.dark .review-bar { background: #333; }
