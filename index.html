@@ -21,7 +21,7 @@
             <div class="dropdown-wrapper">
                 <button class="icon-btn" onclick="toggleSettings()" title="排版">⚙</button>
                 <div id="settingsDropdown" class="dropdown settings-dropdown">
-                    <div id="textSettingsGroup" style="display:none;">
+                    <div id="textSettingsGroup">
                     <div class="setting-row">
                         <span>字号</span>
                         <div class="setting-controls">
@@ -91,8 +91,8 @@
                         <span>英文释义</span>
                         <label class="toggle-switch"><input type="checkbox" id="showEnToggle" checked onchange="toggleShowEn()"><span class="toggle-slider"></span></label>
                     </div>
-                    <div class="dropdown-divider admin-only" style="display:none;"></div>
-                    <button class="dropdown-item admin-only" onclick="openAdmin()" style="display:none;">🔧 管理</button>
+                    <div class="dropdown-divider admin-only"></div>
+                    <button class="dropdown-item admin-only" onclick="openAdmin()">🔧 管理</button>
                 </div>
             </div>
         </div>

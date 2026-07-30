@@ -959,6 +959,8 @@ body.dark .bottom-nav {
 }
 body.dark .nav-item { color: #666; }
 body.dark .nav-item.active { color: #4da3ff; }
+.admin-only { display: none !important; }
+@media (min-width: 800px) { .admin-only { display: block !important; } }
 
 /* === 手机 === */
 @media (max-width: 400px) {
