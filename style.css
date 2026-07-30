@@ -269,21 +269,6 @@ body.dark .topic-label {
 
 .back-btn:active { opacity: 0.6; }
 
-/* 单词库标题左区：返回键 + 标题并排 */
-.panel-header-left {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-.panel-header-left .back-btn {
-    margin-bottom: 0;
-    padding: 6px 0;
-    font-size: 15px;
-}
-.panel-header-left h2 {
-    font-size: 18px;
-}
-
 /* === 文章详情过渡动画 === */
 #articleDetailView {
     opacity: 0;

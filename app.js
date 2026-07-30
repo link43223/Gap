@@ -106,7 +106,7 @@ function renderBookmarks() {
     var emptyHint = document.getElementById("bmEmptyHint");
     if (bookmarks.length === 0) { listDiv.innerHTML = ""; emptyHint.style.display = "block"; return; }
     emptyHint.style.display = "none";
-    var topics = { "science": "科学科技", "health": "健康", "life": "生活", "culture": "文化", "nature": "自然" };
+    var topics = { "daily": "每日精选", "science": "科学科技", "health": "健康", "life": "生活", "culture": "文化", "nature": "自然" };
     listDiv.innerHTML = bookmarks.map(function(bm) {
         return '<div class="bookmark-article-item" onclick="openBookmark(\'' + bm.key + '\',\'' + bm.topic + '\')">' +
             '<div><div class="bm-title">' + bm.title + '</div>' +
@@ -383,7 +383,7 @@ function switchTab(tabName) {
 function selectTopic(topic) {
     currentTopic = topic;
     document.querySelectorAll(".topic-btn").forEach(function(btn) { btn.classList.remove("active"); });
-    var topics = ["science", "health", "life", "culture", "nature", "sports", "gaming"];
+    var topics = ["daily", "science", "health", "life", "culture", "nature", "sports", "gaming"];
     var buttons = document.querySelectorAll(".topic-btn");
     var idx = topics.indexOf(topic);
     if (idx >= 0) buttons[idx].classList.add("active");
@@ -401,6 +401,7 @@ function showArticleList(topic) {
     document.getElementById("wordbank-panel").style.display = "none";
     document.getElementById("bookmarks-panel").style.display = "none";
     document.getElementById("topic-bar").style.display = "flex";
+    document.getElementById("searchBar").style.display = (topic === "daily") ? "none" : "flex";
 
     var keys = getTopicArticles(topic);
     var listDiv = document.getElementById("articleList");
@@ -554,7 +555,7 @@ function clearSearch() {
 function searchArticles(query) {
     var q = query.toLowerCase();
     var results = [];
-    var TOPIC_NAMES = { "science": "科学科技", "health": "健康", "life": "生活", "culture": "文化", "nature": "自然", "sports": "体育", "gaming": "游戏" };
+    var TOPIC_NAMES = { "daily": "每日精选", "science": "科学科技", "health": "健康", "life": "生活", "culture": "文化", "nature": "自然", "sports": "体育", "gaming": "游戏" };
     for (var key in articles) {
         var a = articles[key];
         var inTitle = a.title.toLowerCase().indexOf(q) !== -1;

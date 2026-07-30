@@ -98,13 +98,14 @@
 
     <div id="topic-bar">
         <span class="topic-label">话题</span>
+        <button class="topic-btn" onclick="selectTopic('daily')">⭐ 每日精选</button>
         <button class="topic-btn active" onclick="selectTopic('science')">科学科技</button>
         <button class="topic-btn" onclick="selectTopic('health')">健康</button>
         <button class="topic-btn" onclick="selectTopic('life')">生活</button>
         <button class="topic-btn" onclick="selectTopic('culture')">文化</button>
         <button class="topic-btn" onclick="selectTopic('nature')">自然</button>
-        <button class="topic-btn" onclick="selectTopic('sports')">🏀 体育</button>
-        <button class="topic-btn" onclick="selectTopic('gaming')">🎮 游戏</button>
+        <button class="topic-btn" onclick="selectTopic('sports')">体育</button>
+        <button class="topic-btn" onclick="selectTopic('gaming')">游戏</button>
     </div>
 
     <!-- 阅读面板：列表 + 详情 -->
@@ -137,19 +138,20 @@
     </div>
 
     <div id="wordbank-panel" class="panel" style="display:none;">
-        <div class="panel-header">
-            <div class="panel-header-left">
-                <button class="back-btn wordbank-back" onclick="switchTab('read')">← 返回</button>
-                <h2>我的单词库</h2>
-            </div>
-            <button class="text-btn" onclick="exportWords()">导出</button>
+        <div class="panel-header" style="display:flex;align-items:center;justify-content:flex-start;gap:6px;">
+            <button class="back-btn" onclick="switchTab('read')" style="margin-bottom:0;padding:6px 0;flex-shrink:0;font-size:18px;">←</button>
+            <h2 style="flex:1;font-size:18px;min-width:0;">我的单词库</h2>
+            <button class="text-btn" onclick="exportWords()" style="flex-shrink:0;">导出</button>
         </div>
         <div id="wordList" class="word-list"></div>
         <div id="emptyHint" class="empty-hint">还没有单词</div>
     </div>
 
     <div id="bookmarks-panel" class="panel" style="display:none;">
-        <div class="panel-header"><h2>收藏文章</h2></div>
+        <div class="panel-header" style="display:flex;align-items:center;gap:6px;">
+            <button class="back-btn" onclick="switchTab('read')" style="margin-bottom:0;padding:6px 0;flex-shrink:0;font-size:18px;">←</button>
+            <h2 style="flex:1;font-size:18px;min-width:0;">收藏文章</h2>
+        </div>
         <div id="bookmarkList" class="word-list"></div>
         <div id="bmEmptyHint" class="empty-hint">还没有收藏</div>
     </div>
