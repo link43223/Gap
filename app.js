@@ -131,7 +131,6 @@ function menuAction(action) {
     if (action === "read") switchTab("read");
     else if (action === "wordbank") showTab("wordbank");
     else if (action === "bookmarks") showTab("bookmarks");
-    else if (action === "review") showTab("read");
 }
 
 function toggleShowEn() {
@@ -357,7 +356,6 @@ function showTab(tabName) {
     document.getElementById("read-panel").style.display = (tabName === "read") ? "block" : "none";
     document.getElementById("wordbank-panel").style.display = (tabName === "wordbank") ? "block" : "none";
     document.getElementById("bookmarks-panel").style.display = (tabName === "bookmarks") ? "block" : "none";
-    document.getElementById("daily-panel").style.display = (tabName === "daily") ? "block" : "none";
     document.getElementById("topic-bar").style.display = (tabName === "read") ? "flex" : "none";
     if (tabName === "wordbank") renderWordBank();
     if (tabName === "bookmarks") renderBookmarks();
@@ -366,7 +364,6 @@ function showTab(tabName) {
 function switchTab(tabName) {
     showTab(tabName);
     if (tabName === "read") showArticleList(currentTopic);
-    else if (tabName === "daily") showDailyPick();
 }
 
 // ==========================================
@@ -925,6 +922,3 @@ function exportWords() {
     var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], {type:"text/plain"})); a.download = "gap-wordbank.txt"; a.click();
 }
 
-// ==========================================
-// 背单词
-// ==========================================

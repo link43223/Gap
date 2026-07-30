@@ -363,23 +363,6 @@ body.dark .ali-title-cn { color: #e5e5ea; }
     font-style: italic;
 }
 
-.tap-hint {
-    font-size: 12px;
-    color: #aeaeb2;
-    margin-bottom: 18px;
-}
-
-.article-footer {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 20px;
-}
-
-.page-indicator {
-    font-size: 12px;
-    color: #c7c7cc;
-}
-
 /* === 点击单词 === */
 .article-content {
     font-size: 17px;
@@ -884,7 +867,6 @@ body.dark .export-btn { background: #333; color: #ccc; border-color: #444; }
 body.dark .empty-hint { color: #666; }
 body.dark .article-source { color: #666; }
 body.dark .article-image-caption { color: #666; }
-body.dark .inline-image-caption { color: #666; }
 body.dark #searchBar { background: #252540; }
 body.dark #searchInput { color: #e5e5ea; }
 body.dark #searchInput::placeholder { color: #666; }
@@ -894,5 +876,4 @@ body.dark .toggle-slider { background-color: #444; }
 body.dark .topic-label { color: #999; }
 body.dark .speaker-icon { background: #1e3a5f; color: #4da3ff; }
 body.dark .article-title-row h2 { color: #e5e5ea; }
-body.dark .nav-arrow { background: #333; color: #4da3ff; border-color: #444; }
 
