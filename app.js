@@ -1018,4 +1018,4 @@ function adminSave(){
         btn.disabled=false;btn.textContent="💾 保存";
     }).catch(function(){document.getElementById("adminSaveStatus").textContent="❌ 网络错误";btn.disabled=false;btn.textContent="💾 保存";});
 }
-setTimeout(function(){if(window.innerWidth>=1024)document.querySelectorAll(".admin-only").forEach(function(el){el.style.display="";});},0);
+setTimeout(function(){if(window.innerWidth>=800)document.querySelectorAll(".admin-only").forEach(function(el){el.style.display="block";});},0);
