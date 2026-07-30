@@ -137,7 +137,13 @@
     </div>
 
     <div id="wordbank-panel" class="panel" style="display:none;">
-        <div class="panel-header"><h2>我的单词库</h2><button class="text-btn" onclick="exportWords()">导出</button></div>
+        <div class="panel-header">
+            <div class="panel-header-left">
+                <button class="back-btn wordbank-back" onclick="switchTab('read')">← 返回</button>
+                <h2>我的单词库</h2>
+            </div>
+            <button class="text-btn" onclick="exportWords()">导出</button>
+        </div>
         <div id="wordList" class="word-list"></div>
         <div id="emptyHint" class="empty-hint">还没有单词</div>
     </div>
