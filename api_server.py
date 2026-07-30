@@ -4,6 +4,12 @@ DIR = r"C:\Users\lyen\english-app"
 KEY = "Gap053027"
 
 class Handler(http.server.BaseHTTPRequestHandler):
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.end_headers()
     def do_POST(self):
         length = int(self.headers.get("Content-Length", 0))
         body = self.rfile.read(length).decode("utf-8")
@@ -56,6 +62,6 @@ class Handler(http.server.BaseHTTPRequestHandler):
     def log_message(self, fmt, *args):
         print(f"[API] {args[0]} {args[1]}")
 
-PORT = 3002
+PORT = 3003
 print("API: http://localhost:" + str(PORT))
 http.server.HTTPServer(("0.0.0.0", PORT), Handler).serve_forever()
