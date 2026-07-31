@@ -505,6 +505,7 @@ body.dark .ali-title-cn { color: #e5e5ea; }
 
 #popupMeaning p { margin-bottom: 6px; }
 
+
 /* 查词结果淡入动画 */
 .popup-fade {
     animation: popupFade 0.3s ease;
