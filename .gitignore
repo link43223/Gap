@@ -2,5 +2,9 @@ node_modules/
 __pycache__/
 *.pyc
 make-icon.js
+grade_articles.js
+apply_grade.js
+grade_all.js
+grade_results.json
 package-lock.json
 package.json

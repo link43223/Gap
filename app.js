@@ -392,6 +392,15 @@ function selectTopic(topic) {
     closePopup();
 }
 
+// 难度菱形（红色旋转45°正方形）
+function difficultyDiamonds(d) {
+    if (!d || d < 1) return "";
+    var html = '<span class="difficulty-diamonds">';
+    for (var i = 0; i < d; i++) html += '<span class="difficulty-diamond"></span>';
+    html += '</span>';
+    return html;
+}
+
 // 显示文章列表
 function showArticleList(topic) {
     currentTopic = topic;
@@ -411,7 +420,10 @@ function showArticleList(topic) {
         var preview = a.text.replace(/\. /g, ". ").split(". ").slice(0, 2).join(". ") + ".";
         if (preview.length > 150) preview = preview.slice(0, 150) + "...";
         return '<div class="article-list-item" onclick="openArticle(\'' + key + '\')">' +
+            '<div class="ali-title-row">' +
             '<div class="ali-title">' + a.title + '</div>' +
+            difficultyDiamonds(a.difficulty) +
+            '</div>' +
             (a.titleCn ? '<div class="ali-title-cn">' + a.titleCn + '</div>' : '') +
             '<div class="ali-preview">' + preview + '</div>' +
             (a.source ? '<div class="ali-source">' + a.source + '</div>' : '') +
@@ -459,7 +471,8 @@ function makeWordsClickable(container, text) {
             span.className = "word";
             span.textContent = word;
             span.title = "点击查词";
-            if (knownWords.indexOf(word.toLowerCase()) !== -1) span.classList.add("known");
+            // 用原型匹配：库里存 start，文章里的 starting/starts 也算已认识
+            if (knownWords.indexOf(getBaseWord(word)) !== -1) span.classList.add("known");
             span.addEventListener("click", function(e) { e.stopPropagation(); lookupWord(word, span); });
             container.appendChild(span);
             if (punct) container.appendChild(document.createTextNode(punct));
@@ -478,6 +491,7 @@ function loadArticle(key) {
     void detailView.offsetWidth;
     detailView.classList.add("show");
     makeWordsClickable(document.getElementById("articleTitle"), article.title);
+    document.getElementById("articleDifficulty").innerHTML = difficultyDiamonds(article.difficulty);
     var titleCnEl = document.getElementById("articleTitleCn");
     if (article.titleCn) {
         titleCnEl.textContent = article.titleCn;
@@ -571,6 +585,7 @@ function searchArticles(query) {
                 text: a.text,
                 source: a.source || "",
                 topic: TOPIC_NAMES[topicKey] || "",
+                difficulty: a.difficulty || 0,
                 score: inTitle ? 2 : 1
             });
         }
@@ -589,7 +604,10 @@ function renderSearchResults(results) {
         var preview = r.text.replace(/\. /g, ". ").split(". ").slice(0, 2).join(". ") + ".";
         if (preview.length > 150) preview = preview.slice(0, 150) + "...";
         return '<div class="article-list-item" onclick="openArticle(\'' + r.key + '\')">' +
+            '<div class="ali-title-row">' +
             '<div class="ali-title">' + r.title + '</div>' +
+            difficultyDiamonds(r.difficulty) +
+            '</div>' +
             (r.titleCn ? '<div class="ali-title-cn">' + r.titleCn + '</div>' : '') +
             '<div class="ali-preview">' + preview + '</div>' +
             (r.topic ? '<div class="ali-source">话题：' + r.topic + '</div>' : '') +
@@ -623,7 +641,7 @@ async function lookupWord(word, element) {
     popup.classList.add("show");
     document.getElementById("overlay").style.display = "block";
     var saveBtn = document.getElementById("saveWordBtn");
-    if (isInWordBank(word, currentArticleKey)) {
+    if (isInWordBank(getBaseWord(word), currentArticleKey)) {
         saveBtn.textContent = "✓ 已在单词库中"; saveBtn.className = "action-btn saved"; saveBtn.onclick = removeSavedWord;
     } else {
         saveBtn.textContent = "+ 加入单词库"; saveBtn.className = "action-btn"; saveBtn.onclick = saveWord;
@@ -666,6 +684,77 @@ function findInDict(word) {
     for (var i = 1; i < forms.length; i++) { if (ZH_DICT[forms[i]]) return { base: forms[i], entry: ZH_DICT[forms[i]] }; }
     if (ZH_DICT[lower]) return { base: lower, entry: ZH_DICT[lower] };
     return null;
+}
+
+// ==========================================
+// 单词入库原型还原（变形→原型）
+// ==========================================
+var BASE_WORD_EXCEPTIONS = ["news","means","series","species","always","perhaps","bias","canvas","lens","atlas","chaos","focus","campus","virus","genius","versus","plus","minus","bus","gas","this","status","analysis","basis","crisis","thesis","emphasis","ever","letter"];
+
+// 带 -ing/-ed 的形容词（不能还原成动词）
+var PARTICIPIAL_ADJS = ["interesting","interested","exciting","excited","boring","bored","tiring","tired","surprising","surprised","amazing","amazed","confusing","confused","worrying","worried","disappointing","disappointed","frustrating","frustrated","embarrassing","embarrassed","frightening","frightened","relaxing","relaxed","exhausting","exhausted","annoying","annoyed","pleasing","pleased","satisfying","satisfied","fascinating","fascinated","shocking","shocked","moving","moved","convincing","convinced","determined","devoted","impressed","impressive","surrounded","limited","unexpected","related","complicated","experienced","dedicated","occupied","intended","following","remaining","challenging","growing","surrounding"];
+
+function isVerbEntry(entry) { return /^v[t]?[i]?\./.test((entry || "").trim()); }
+function isAdjEntry(entry) { return /^adj\.|^a\./.test((entry || "").trim()); }
+
+// 把变形词还原成原型（starting→start, things→thing, bigger→big）
+// 规则：-ies/-s/-es → 单数/原形；-ing/-ed → 动词原形；-er/-est → 形容词原级
+// 保护：例外清单 + 还原结果必须在词典里能找到
+function getBaseWord(word) {
+    var lower = word.toLowerCase();
+    if (BASE_WORD_EXCEPTIONS.indexOf(lower) !== -1) return lower;
+    if (PARTICIPIAL_ADJS.indexOf(lower) !== -1) return lower;  // -ing/-ed 形容词不还原
+    if (lower.length < 3) return lower;
+    var origInDict = !!ZH_DICT[lower];
+    // 带 -ing/-ed 且词典标为形容词 → 不还原（如 interesting, tired, bored）
+    if (origInDict && isAdjEntry(ZH_DICT[lower]) && (lower.endsWith("ing") || lower.endsWith("ed"))) return lower;
+
+    var cands = [];
+    if (lower.endsWith("ies") && lower.length > 4) cands.push({ c: lower.slice(0, -3) + "y", r: "ies" });
+    if (lower.endsWith("ing") && lower.length > 4) {
+        var b = lower.slice(0, -3);
+        cands.push({ c: b, r: "ing" });
+        cands.push({ c: b + "e", r: "ing" });
+        if (b.length > 2 && b[b.length-1] === b[b.length-2]) cands.push({ c: b.slice(0, -1), r: "ing" });
+    }
+    if (lower.endsWith("ed") && lower.length > 3) {
+        var b = lower.slice(0, -2);
+        cands.push({ c: b, r: "ed" });
+        cands.push({ c: b + "e", r: "ed" });
+        if (b.length > 1 && b[b.length-1] === b[b.length-2]) cands.push({ c: b.slice(0, -1), r: "ed" });
+    }
+    if (lower.endsWith("es") && lower.length > 3) {
+        cands.push({ c: lower.slice(0, -1), r: "es" });
+        cands.push({ c: lower.slice(0, -2), r: "es" });
+    } else if (lower.endsWith("s") && !lower.endsWith("ss") && lower.length > 3) {
+        cands.push({ c: lower.slice(0, -1), r: "s" });
+    }
+    if (lower.endsWith("er") && lower.length > 4) {
+        var b = lower.slice(0, -2);
+        cands.push({ c: b, r: "er" });
+        cands.push({ c: b + "e", r: "er" });
+        if (b.length > 1 && b[b.length-1] === b[b.length-2]) cands.push({ c: b.slice(0, -1), r: "er" });
+    }
+    if (lower.endsWith("est") && lower.length > 5) {
+        var b = lower.slice(0, -3);
+        cands.push({ c: b, r: "est" });
+        if (b.length > 1 && b[b.length-1] === b[b.length-2]) cands.push({ c: b.slice(0, -1), r: "est" });
+    }
+
+    for (var i = 0; i < cands.length; i++) {
+        var c = cands[i].c, entry = ZH_DICT[c];
+        if (!entry) continue;
+        var rule = cands[i].r;
+        if (rule === "ing" || rule === "ed") {
+            if (isVerbEntry(entry)) return c;
+            if (!origInDict) return c;
+        } else if (rule === "er" || rule === "est") {
+            if (isAdjEntry(entry)) return c;
+        } else {
+            return c;
+        }
+    }
+    return lower;
 }
 
 async function lookupChinese(word) {
@@ -881,7 +970,8 @@ function saveWord() {
     if (!currentWord) return;
     var article = articles[currentArticleKey];
     var title = article ? article.title : "未知文章";
-    addToWordBank(currentWord, document.getElementById("popupMeaning").textContent, currentArticleKey, title);
+    var base = getBaseWord(currentWord);  // 入库前还原成原型
+    addToWordBank(base, document.getElementById("popupMeaning").textContent, currentArticleKey, title);
     var btn = document.getElementById("saveWordBtn");
     btn.textContent = "✓ 已在单词库中"; btn.className = "action-btn saved"; btn.onclick = removeSavedWord;
     if (currentWordElement) currentWordElement.classList.add("known");

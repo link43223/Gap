@@ -224,12 +224,25 @@ body.dark .topic-label {
     box-shadow: 0 1px 1px rgba(0,0,0,0.02);
 }
 
+.article-list-item .ali-title-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
 .article-list-item .ali-title {
     font-size: 18px;
     font-weight: 600;
     color: #1a1a2e;
     margin-bottom: 2px;
     line-height: 1.4;
+    flex: 1;
+    min-width: 0;
+}
+/* 列表卡片里难度菱形固定在右上角，不随标题换行 */
+.article-list-item .difficulty-diamonds {
+    margin-left: 0;
+    margin-top: 4px;
+    flex-shrink: 0;
 }
 
 .ali-title-cn {
@@ -237,6 +250,34 @@ body.dark .topic-label {
     color: #8e8e93;
     margin-bottom: 8px;
     letter-spacing: 0.5px;
+}
+
+/* === 难度菱形（红色旋转45°正方形） === */
+.difficulty-diamonds {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    margin-left: 6px;
+    vertical-align: middle;
+    transform: translateY(-1px);
+}
+.difficulty-diamond {
+    width: 8px;
+    height: 8px;
+    background: #ff3b30;
+    transform: rotate(45deg);
+    display: inline-block;
+    flex-shrink: 0;
+    border-radius: 1px;
+}
+
+/* 文章详情页难度：固定在标题行右侧（收藏星号旁） */
+.article-title-row .article-difficulty {
+    flex-shrink: 0;
+    margin-top: 6px;
+}
+.article-title-row .article-difficulty .difficulty-diamonds {
+    margin-left: 0;
 }
 
 .article-list-item .ali-preview {
@@ -294,7 +335,7 @@ body.dark .topic-label {
 
 .article-title-row {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: flex-start;
     gap: 10px;
 }
