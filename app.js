@@ -22,6 +22,7 @@ var currentArticleKey = "science";
 var currentWord = "";
 var currentWordElement = null;
 var currentDictData = null;
+var currentPhonetic = "";
 var BOOKMARK_KEY = "gap_bookmarks";
 var audioCache = {};
 
@@ -606,7 +607,18 @@ async function lookupWord(word, element) {
     currentWord = word;
     var popup = document.getElementById("wordPopup");
     var wordEl = document.getElementById("popupWord");
-    wordEl.innerHTML = word + ' <span class="speaker-icon" onclick="playPronunciation(\'' + word.replace(/'/g, "\\'") + '\')" title="播放读音"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19 11,5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg></span>';
+    // 本地音标（优先），显示在单词旁边
+    var localPhonetic = PHONETIC[word.toLowerCase()];
+    if (!localPhonetic) {
+        var baseInfo = findInDict(word);
+        if (baseInfo && baseInfo.base !== word.toLowerCase()) {
+            localPhonetic = PHONETIC[baseInfo.base.toLowerCase()];
+        }
+    }
+    currentPhonetic = localPhonetic || "";
+    wordEl.innerHTML = word +
+            (localPhonetic ? ' <span class="popup-phonetic">/' + localPhonetic + '/</span>' : '') +
+            ' <span class="speaker-icon" onclick="playPronunciation(\'' + word.replace(/'/g, "\\'") + '\')" title="播放读音"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19 11,5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg></span>';
     document.getElementById("popupMeaning").textContent = "查询中...";
     popup.classList.add("show");
     document.getElementById("overlay").style.display = "block";
@@ -659,27 +671,29 @@ function findInDict(word) {
 async function lookupChinese(word) {
     var showEn = getSetting("showEn", true);
     var found = findInDict(word);
+    var popupEl = document.getElementById("popupMeaning");
+
+    // ① 先显示"翻译中..."（避免本地词典和有道结果来回闪）
+    popupEl.innerHTML = '<p style="font-size:15px;color:#aeaeb2;">翻译中...</p>';
+
+    // ③ 有道中文翻译（优先显示）
+    var youdaoData = await fetchYoudao(word);
+    var youdaoEntry = youdaoData ? youdaoData.explain : null;
+
+    // ④ 渲染中文部分 + 淡入（音标已放在标题栏单词旁边）
     var html = "";
-
-    // ① 先显示内置词典（瞬间响应）
-    var phonetic = PHONETIC[word.toLowerCase()];
-    if (!phonetic && found && found.base !== word.toLowerCase()) {
-        phonetic = PHONETIC[found.base.toLowerCase()];
+    if (youdaoEntry) {
+        html += '<p style="font-size:16px;font-weight:600;margin-bottom:4px;">' + youdaoEntry + '</p>';
+    } else if (found) {
+        html += '<p style="font-size:16px;font-weight:600;margin-bottom:4px;">' + found.entry + '</p>';
+    }
+    if (html) {
+        popupEl.innerHTML = html;
+        fadeInPopup(popupEl);
     }
 
-    if (found) {
-        html += '<p style="font-size:16px;font-weight:600;margin-bottom:4px;">' + found.entry +
-                (phonetic ? ' <span style="font-size:13px;color:#aeaeb2;font-weight:400;">/' + phonetic + '/</span>' : '') +
-                '</p>';
-    }
-    document.getElementById("popupMeaning").innerHTML = html || "<p>加载中...</p>";
-
-    // ② 后台加载在线数据
-    if (showEn || !found) {
-        try { currentDictData = await fetchDictAPI(word); } catch(e) { currentDictData = null; }
-    } else {
-        currentDictData = null;
-    }
+    // ⑤ 后台加载词典API（音标/音频始终需要，与英文释义开关无关）
+    try { currentDictData = await fetchDictAPI(word); } catch(e) { currentDictData = null; }
 
     // 缓存音频 URL
     if (currentDictData && !audioCache[word]) {
@@ -709,29 +723,60 @@ async function lookupChinese(word) {
         if (audioCache[found.base]) audioCache[word] = audioCache[found.base];
     }
 
-    // 完善音标
-    if (!phonetic && currentDictData) {
-        if (currentDictData[0].phonetic) {
-            phonetic = currentDictData[0].phonetic;
-        } else if (currentDictData[0].phonetics && currentDictData[0].phonetics.length > 0) {
+    // 音标补全：本地音标缺失时，用词典API的音标更新标题栏
+    if (!currentPhonetic && currentDictData && currentDictData[0]) {
+        var pText = currentDictData[0].phonetic;
+        if (!pText && currentDictData[0].phonetics && currentDictData[0].phonetics.length > 0) {
             for (var p = 0; p < currentDictData[0].phonetics.length; p++) {
-                if (currentDictData[0].phonetics[p].text) { phonetic = currentDictData[0].phonetics[p].text; break; }
+                if (currentDictData[0].phonetics[p].text) { pText = currentDictData[0].phonetics[p].text; break; }
             }
+        }
+        if (pText) {
+            var phSpan = document.querySelector("#popupWord .popup-phonetic");
+            if (phSpan) {
+                phSpan.textContent = "/" + pText + "/";
+            } else {
+                // 标题栏还没有音标，插到单词和小喇叭之间
+                var wordNode = document.getElementById("popupWord");
+                var speaker = wordNode.querySelector(".speaker-icon");
+                var newSpan = document.createElement("span");
+                newSpan.className = "popup-phonetic";
+                newSpan.textContent = "/" + pText + "/";
+                if (speaker) {
+                    wordNode.insertBefore(newSpan, speaker);
+                } else {
+                    wordNode.appendChild(newSpan);
+                }
+            }
+            currentPhonetic = pText;
         }
     }
 
-    // ③ 重新渲染完整内容
-    html = "";
-    if (found) {
-        html += '<p style="font-size:16px;font-weight:600;margin-bottom:4px;">' + found.entry +
-                (phonetic ? ' <span style="font-size:13px;color:#aeaeb2;font-weight:400;">/' + phonetic + '/</span>' : '') +
-                '</p>';
-        if (currentDictData) html += '<hr style="border:none;border-top:1px solid #e5e5ea;margin:8px 0;">';
+    // ⑥ 英文释义淡入补充（独立容器，不闪中文）
+    // 显示条件：开英文释义 或 没有中文结果时兜底
+    if (currentDictData && (showEn || !(youdaoEntry || found))) {
+        var enHtml = "";
+        currentDictData.forEach(function(entry) { entry.meanings.forEach(function(m) { enHtml += "<p><em>" + shortPos(m.partOfSpeech) + "</em> " + m.definitions.slice(0,2).map(function(d){return d.definition}).join("；") + "</p>"; }); });
+        if (enHtml) {
+            var enDiv = document.createElement("div");
+            enDiv.className = "popup-english";
+            enDiv.innerHTML = (html ? '<hr style="border:none;border-top:1px solid #e5e5ea;margin:8px 0;">' : "") + enHtml;
+            popupEl.appendChild(enDiv);
+            fadeInPopup(enDiv);
+        }
     }
-    if (currentDictData) {
-        currentDictData.forEach(function(entry) { entry.meanings.forEach(function(m) { html += "<p><em>" + shortPos(m.partOfSpeech) + "</em> " + m.definitions.slice(0,2).map(function(d){return d.definition}).join("；") + "</p>"; }); });
+
+    // ⑦ 兜底：确实查不到
+    if (!popupEl.textContent || popupEl.textContent.trim() === "翻译中...") {
+        popupEl.innerHTML = "<p>该单词暂未收录</p>";
     }
-    document.getElementById("popupMeaning").innerHTML = html || "<p>该单词暂未收录</p>";
+}
+
+// 淡入动画辅助函数
+function fadeInPopup(el) {
+    el.classList.remove("popup-fade");
+    void el.offsetWidth;
+    el.classList.add("popup-fade");
 }
 
 async function fetchDictAPI(word) {
@@ -742,6 +787,48 @@ async function fetchDictAPI(word) {
         clearTimeout(timer);
         return r.ok ? await r.json() : null;
     } catch(e) { return null; }
+}
+
+// 有道词典中文翻译（JSONP 方式，绕过跨域限制，无需API Key）
+var _youdaoCbCount = 0;
+function fetchYoudao(word) {
+    return new Promise(function(resolve) {
+        var callbackName = "youdaoCb" + (++_youdaoCbCount) + "_" + Math.floor(Math.random() * 100000);
+        var script = document.createElement("script");
+        script.src = "https://dict.youdao.com/suggest?num=5&ver=3.0&doctype=json&cache=false&le=en&q=" + encodeURIComponent(word) + "&callback=" + callbackName;
+
+        var done = false;
+        var timer = setTimeout(function() { if (!done) { done = true; cleanup(); resolve(null); } }, 5000);
+
+        function cleanup() {
+            clearTimeout(timer);
+            delete window[callbackName];
+            if (script.parentNode) script.parentNode.removeChild(script);
+        }
+
+        window[callbackName] = function(data) {
+            if (done) return;
+            done = true;
+            cleanup();
+            try {
+                if (data && data.data && data.data.entries && data.data.entries.length > 0) {
+                    // 优先精确匹配，其次取第一条
+                    for (var i = 0; i < data.data.entries.length; i++) {
+                        if (data.data.entries[i].entry.toLowerCase() === word.toLowerCase()) {
+                            resolve(data.data.entries[i]);
+                            return;
+                        }
+                    }
+                    resolve(data.data.entries[0]);
+                } else {
+                    resolve(null);
+                }
+            } catch(e) { resolve(null); }
+        };
+
+        script.onerror = function() { if (!done) { done = true; cleanup(); resolve(null); } };
+        document.head.appendChild(script);
+    });
 }
 
 // ==========================================

@@ -447,6 +447,14 @@ body.dark .ali-title-cn { color: #e5e5ea; }
     color: var(--accent);
 }
 
+/* 查词弹窗标题栏音标（紧跟单词后面，覆盖 strong 的继承） */
+.popup-header .popup-phonetic {
+    font-size: 13px;
+    font-weight: 400;
+    color: #aeaeb2;
+    margin-left: 4px;
+}
+
 #popupMeaning {
     font-size: 14px;
     color: #3a3a3c;
@@ -455,6 +463,15 @@ body.dark .ali-title-cn { color: #e5e5ea; }
 }
 
 #popupMeaning p { margin-bottom: 6px; }
+
+/* 查词结果淡入动画 */
+.popup-fade {
+    animation: popupFade 0.3s ease;
+}
+@keyframes popupFade {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 
 #popupMeaning em {
     color: var(--accent);
