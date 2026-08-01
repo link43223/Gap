@@ -1,0 +1,44 @@
+1
+00:00:00,100 --> 00:00:02,550
+How Do Touchscreens Work?
+
+2
+00:00:02,500 --> 00:00:06,962
+Modern smartphones predominantly employ capacitive touchscreens.
+
+3
+00:00:06,962 --> 00:00:15,262
+The glass panel is coated with indium tin oxide (ITO), a transparent conductor that stores a uniform electrostatic field.
+
+4
+00:00:15,262 --> 00:00:23,562
+The human body is electrically conductive; when a finger contacts the screen, it draws a minute alternating current from each corner of the panel.
+
+5
+00:00:23,562 --> 00:00:29,812
+A controller circuit measures the current drop at each electrode and triangulates the exact touch coordinates.
+
+6
+00:00:29,812 --> 00:00:38,312
+This measurement cycle completes in roughly 10-20 milliseconds, enabling 60 Hz touch sampling rates typical of modern devices.
+
+7
+00:00:38,312 --> 00:00:50,550
+Multi-touch capability, which supports pinch-to-zoom, rotation, and multi-finger gestures, is achieved by projecting a grid of drive and sense lines and scanning the capacitance changes across every intersection.
+
+8
+00:00:50,550 --> 00:01:00,325
+Older resistive touchscreens rely on two flexible layers separated by a microscopic gap; applied pressure forces the layers into contact, completing a circuit.
+
+9
+00:01:00,325 --> 00:01:12,950
+Resistive screens cannot detect multi-touch and are less durable, but they respond to any object (a gloved finger, a stylus) and remain common in ATMs, industrial controls, and medical devices.
+
+10
+00:01:12,950 --> 00:01:24,475
+The first capacitive touchscreen was demonstrated in 1965 by E. A. Johnson at the Royal Radar Establishment in Malvern, England, and described in a 1967 paper.
+
+11
+00:01:24,475 --> 00:01:33,300
+Johnson's design used a single-layer capacitive surface for finger detection, decades before the technology became ubiquitous in consumer electronics.
+

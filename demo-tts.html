@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gap - TTS 音质对比试听</title>
+<style>
+    body { font-family: -apple-system, "PingFang SC", sans-serif; background: #edf3fa; color: #1d1d1f; padding: 20px; max-width: 640px; margin: 0 auto; }
+    h1 { font-size: 20px; }
+    .card { background: white; border-radius: 14px; padding: 16px; margin: 12px 0; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    .sentence { font-size: 16px; line-height: 1.7; color: #3a3a3c; background: #f5f7fa; padding: 12px; border-radius: 10px; margin-bottom: 12px; }
+    button { display: block; width: 100%; padding: 12px; margin: 8px 0; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; }
+    .b1 { background: #0071e3; color: white; }
+    .b2 { background: #e8e8ed; color: #333; }
+    .b1:active, .b2:active { opacity: 0.85; }
+    .tag { font-size: 12px; color: #8e8e93; margin-top: 4px; }
+    .hint { font-size: 13px; color: #6b7280; background: #fff8e1; padding: 10px; border-radius: 8px; }
+</style>
+</head>
+<body>
+<h1>🎧 TTS 音质对比试听</h1>
+
+<div class="card">
+    <div class="sentence" id="sent">Batteries store energy through electrochemical reactions. They convert chemical energy into electricity. This process powers our phones and electric cars every day.</div>
+    <button class="b1" onclick="playBaidu()">🔊 百度 TTS（在线，所有设备一样）</button>
+    <div class="tag">免费 · 纯前端 · 音质统一</div>
+    <button class="b2" onclick="playSystem()">🔊 你现在手机的系统语音（Web Speech）</button>
+    <div class="tag">就是你目前 app 里的声音 · 不同设备不一样</div>
+</div>
+
+<div class="card">
+    <div class="sentence">This is the second test sentence. It sounds a bit different, right? Try comparing the two buttons above several times.</div>
+    <button class="b1" onclick="playBaidu2()">🔊 百度 TTS 第二段</button>
+    <button class="b2" onclick="playSystem2()">🔊 系统语音 第二段</button>
+</div>
+
+<div class="card" style="border: 2px solid #0071e3;">
+    <div class="tag" style="color:#0071e3;font-weight:700;">⭐ 新方案：微软神经语音（edge-tts 预生成，目前最推荐的音质）</div>
+    <div class="sentence">完整的一篇英文文章朗读，真实效果。</div>
+    <button class="b1" onclick="playLocal('demo-audio/science-jenny.mp3')">🔊 女声 Jenny（美音）</button>
+    <button class="b1" onclick="playLocal('demo-audio/science-ryan.mp3')">🔊 男声 Ryan（英音）</button>
+    <div class="tag">已定方案：女声=美音 Jenny，男声=英音 Ryan · 所有设备听到一模一样的优质声音</div>
+</div>
+
+<div class="hint">💡 对比重点：微软女声/男声 vs 你手机的系统语音。告诉我哪个最顺耳，我就把「听文章」换成那个。换好后点击文章里任意一句也能听。</div>
+
+<script>
+function bdUrl(text) {
+    return "https://fanyi.baidu.com/gettts?lan=en&text=" + encodeURIComponent(text) + "&spd=3&source=web";
+}
+function playBaidu() { playBaiduUrl(bdUrl(document.getElementById("sent").textContent), "百度1"); }
+function playSystem() { speak(document.getElementById("sent").textContent); }
+function playBaidu2() { playBaiduUrl(bdUrl("This is the second test sentence. It sounds a bit different, right? Try comparing the two buttons above several times."), "百度2"); }
+function playSystem2() { speak("This is the second test sentence. It sounds a bit different, right? Try comparing the two buttons above several times."); }
+
+// 用 no-referrer 绕开百度的来源校验
+function playBaiduUrl(url, tag) {
+    var a = document.createElement("audio");
+    a.src = url;
+    a.setAttribute("referrerpolicy", "no-referrer");
+    a.setAttribute("preload", "auto");
+    document.body.appendChild(a);
+    a.onerror = function() {
+        alert(tag + " 播放失败。\nURL: " + url.substring(0, 90) + "\n\n请把这段文字告诉我");
+        document.body.removeChild(a);
+    };
+    a.onended = function() { document.body.removeChild(a); };
+    a.play().then(function() {
+        setTimeout(function() { if (a.parentNode) document.body.removeChild(a); }, 30000);
+    }).catch(function(e) {
+        alert(tag + " 播放失败：" + e.message + "\nURL: " + url.substring(0, 90));
+        document.body.removeChild(a);
+    });
+}
+function playLocal(url, tag) {
+    var a = new Audio(url);
+    a.onerror = function() { alert("本地音频播放失败：" + url); };
+    a.play().catch(function(e) { alert("播放失败：" + e.message + " (" + url + ")"); });
+}
+function speak(text) {
+    if (!("speechSynthesis" in window)) { alert("此浏览器不支持语音"); return; }
+    speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = "en-US";
+    u.rate = 0.95;
+    u.onerror = function(e) { alert("系统语音播放失败：" + e.error); };
+    speechSynthesis.speak(u);
+}
+</script>
+</body>
+</html>

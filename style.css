@@ -69,11 +69,6 @@ header h1 {
 .icon-btn:hover { background: #f0f0f5; }
 .icon-btn:active { background: #e5e5ea; }
 
-.bookmark-header-btn {
-    color: #f59e0b;
-    font-size: 17px;
-}
-
 /* === 下拉菜单 === */
 .dropdown-wrapper {
     position: relative;
@@ -271,10 +266,16 @@ body.dark .topic-label {
     border-radius: 1px;
 }
 
-/* 文章详情页难度：固定在标题行右侧（收藏星号旁） */
-.article-title-row .article-difficulty {
+/* 文章详情页难度：固定在标题行右侧 */
+.article-title-row .article-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     flex-shrink: 0;
     margin-top: 6px;
+}
+.article-title-row .article-difficulty {
+    flex-shrink: 0;
 }
 .article-title-row .article-difficulty .difficulty-diamonds {
     margin-left: 0;
@@ -367,14 +368,6 @@ body.dark .article-title-cn { color: #e5e5ea; }
 
 body.dark .ali-title-cn { color: #e5e5ea; }
 
-.bookmark-article-btn {
-    flex-shrink: 0;
-    transition: transform 0.2s;
-}
-
-.bookmark-article-btn:active { transform: scale(1.2); }
-.bookmark-article-btn.bookmarked { color: #f59e0b; }
-
 .article-source {
     font-size: 12px;
     color: #aeaeb2;
@@ -440,6 +433,30 @@ body.dark .ali-title-cn { color: #e5e5ea; }
 
 .speaker-icon:hover { background: #d0e2fc; }
 .speaker-icon:active { transform: scale(0.9); background: #b8d4f8; }
+
+/* 文章朗读中：喇叭高亮为主题色 */
+.speaker-icon.tts-playing { background: var(--accent); color: #fff; }
+.speaker-icon.tts-playing:hover { background: var(--accent-dark); }
+
+/* 文章标题行朗读喇叭：简洁无底圈，纯线条图标 */
+.tts-article-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px; height: 26px;
+    padding: 0;
+    margin: 0; /* 对齐由 .article-meta 的 flex 居中控制 */
+    border: none;
+    background: transparent;
+    color: var(--accent);
+    cursor: pointer;
+    transition: opacity 0.15s;
+    vertical-align: middle;
+}
+.tts-article-btn:hover { opacity: 0.7; }
+.tts-article-btn:active { transform: scale(0.9); }
+/* 朗读中：图标加深 */
+.tts-article-btn.tts-playing { color: var(--accent-dark); }
 
 .article-content .word.known {
     background: #e8f5e9;
@@ -564,7 +581,78 @@ body.dark .ali-title-cn { color: #e5e5ea; }
     padding: 2px 0;
 }
 
-/* === 单词库 & 收藏面板 === */
+/* === 听文章（TTS） === */
+.tts-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 16px 0 4px;
+    padding: 10px 14px;
+    background: #f2f2f7;
+    border-radius: 12px;
+}
+
+.tts-btn {
+    flex-shrink: 0;
+    padding: 8px 20px;
+    border: none;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.tts-btn:active { opacity: 0.85; }
+
+.tts-btn.small {
+    padding: 6px 10px;
+    background: #e8e8ed;
+    color: #333;
+    font-size: 14px;
+}
+
+.tts-skip, .tts-voice {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tts-rate {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tts-rate-label { font-size: 12px; color: #aeaeb2; }
+
+.rate-btn {
+    padding: 4px 10px;
+    border: 1px solid #d2d2d7;
+    border-radius: 8px;
+    background: #fff;
+    font-size: 13px;
+    color: #555;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.rate-btn.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: transparent;
+}
+
+/* 朗读时当前句子高亮 */
+.sentence.tts-reading {
+    background: var(--accent-light);
+    border-radius: 4px;
+}
+
+/* === 单词库面板 === */
 .panel-header {
     display: flex;
     justify-content: space-between;
@@ -686,37 +774,6 @@ body.dark .ali-title-cn { color: #e5e5ea; }
     color: #aeaeb2;
     padding: 48px 0;
     font-size: 14px;
-}
-
-/* === 收藏文章列表 === */
-.bookmark-article-item {
-    background: white;
-    border-radius: 12px;
-    padding: 14px 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-    cursor: pointer;
-    margin-bottom: 8px;
-}
-
-.bookmark-article-item:active { transform: scale(0.98); }
-
-.bookmark-article-item .bm-title {
-    font-size: 15px;
-    font-weight: 600;
-    color: #1a1a2e;
-    flex: 1;
-}
-
-.bookmark-article-item .bm-remove {
-    border: none;
-    background: none;
-    color: #ff3b30;
-    cursor: pointer;
-    font-size: 20px;
-    padding: 6px;
 }
 
 /* === 岛式单词库 === */
@@ -858,6 +915,13 @@ body.dark .word-island-header:hover { background: #1e1e35; }
 
 .adj-btn:active { background: #f0f0f5; }
 
+/* 朗读设置（声音/语速）选中高亮 */
+.adj-btn.voice-btn.active, .adj-btn.rate-btn.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: transparent;
+}
+
 .adj-label {
     font-size: 12px;
     color: #8e8e93;
@@ -955,13 +1019,18 @@ body.dark #topic-bar { background: rgba(26,26,46,0.88) !important; }
 body.dark header h1 { color: #e5e5ea; }
 body.dark .icon-btn { color: #ccc; }
 body.dark .icon-btn:hover { background: #333; }
-body.dark .bookmark-header-btn { color: #f59e0b; }
 body.dark .topic-btn { background: #252540; border-color: #444; color: #ccc; }
 body.dark .topic-btn.active { background: var(--accent); color: white; }
 body.dark .article-card { background: #252540; }
 body.dark .article-content { color: #ccc; }
 body.dark .article-content .word.known { background: #1a3a1a; border-color: #4caf50; }
 body.dark .article-content .word:hover { background: #2a2a4a; }
+body.dark .tts-bar { background: #252540; }
+body.dark .tts-btn.small { background: #1e1e35; color: #cfcfd7; }
+body.dark .tts-rate-label { color: #8e8e93; }
+body.dark .rate-btn { background: #1e1e35; border-color: #333; color: #cfcfd7; }
+body.dark .rate-btn.active { background: var(--accent); color: #fff; border-color: transparent; }
+body.dark .sentence.tts-reading { background: #2a2a4a; }
 body.dark .article-list-item { background: #252540; }
 body.dark .article-list-item .ali-title { color: #e5e5ea; }
 body.dark .article-list-item .ali-preview { color: #999; }
@@ -976,6 +1045,7 @@ body.dark .dropdown-setting { color: #ccc; }
 body.dark .settings-dropdown { background: #252540; }
 body.dark .settings-dropdown .setting-row { border-color: #333; color: #e5e5ea; }
 body.dark .adj-btn { background: #333; color: #ccc; border-color: #444; }
+body.dark .adj-btn.voice-btn.active, body.dark .adj-btn.rate-btn.active { background: var(--accent); color: #fff; border-color: transparent; }
 body.dark .adj-label { color: #999; }
 body.dark .settings-dropdown select { background: #333; color: #ccc; border-color: #444; }
 body.dark .action-btn.secondary { background: #333; color: #4da3ff; }
@@ -993,10 +1063,9 @@ body.dark .article-image-caption { color: #666; }
 body.dark #searchBar { background: #252540; }
 body.dark #searchInput { color: #e5e5ea; }
 body.dark #searchInput::placeholder { color: #666; }
-body.dark .bookmark-article-item { background: #252540; }
-body.dark .bookmark-article-item .bm-title { color: #e5e5ea; }
 body.dark .toggle-slider { background-color: #444; }
 body.dark .topic-label { color: #999; }
 body.dark .speaker-icon { background: #1e3a5f; color: #4da3ff; }
 body.dark .article-title-row h2 { color: #e5e5ea; }
+
 

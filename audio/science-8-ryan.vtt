@@ -1,0 +1,76 @@
+1
+00:00:00,100 --> 00:00:02,850
+The Internet: A Brief History.
+
+2
+00:00:02,800 --> 00:00:07,687
+The internet originated from packet-switching research in the 1960s.
+
+3
+00:00:07,687 --> 00:00:21,987
+Paul Baran at the RAND Corporation and Donald Davies at the UK National Physical Laboratory independently proposed packet switching—breaking messages into discrete blocks routed dynamically through a mesh network—as an alternative to circuit-switched telephony.
+
+4
+00:00:21,987 --> 00:00:33,887
+The Advanced Research Projects Agency Network (ARPANET), funded by the US Department of Defense, connected its first nodes at UCLA and the Stanford Research Institute in October 1969.
+
+5
+00:00:33,887 --> 00:00:39,837
+The first message, intended as "LOGIN," transmitted only "LO" before the system crashed.
+
+6
+00:00:39,837 --> 00:00:52,150
+In 1973, Vint Cerf and Robert Kahn published the design of the Transmission Control Protocol and Internet Protocol (TCP/IP), enabling heterogeneous networks to interconnect seamlessly.
+
+7
+00:00:52,150 --> 00:00:59,325
+ARPANET transitioned to TCP/IP on January 1, 1983—the birth of the modern internet.
+
+8
+00:00:59,325 --> 00:01:11,812
+The Domain Name System (DNS), introduced in 1984 by Paul Mockapetris, mapped human-readable domain names to numerical IP addresses, replacing manual HOSTS.TXT distribution.
+
+9
+00:01:11,812 --> 00:01:20,550
+Tim Berners-Lee, working at CERN in 1989, proposed a hypertext-based information management system that became the World Wide Web.
+
+10
+00:01:20,550 --> 00:01:37,225
+He created three foundational technologies: HyperText Markup Language (HTML) for document structure; HyperText Transfer Protocol (HTTP) for client-server communication; and Uniform Resource Identifiers (URIs) for resource addressing.
+
+11
+00:01:37,225 --> 00:01:41,400
+The first web page was published in August 1991.
+
+12
+00:01:41,400 --> 00:01:53,000
+Marc Andreessen and Eric Bina at the National Center for Supercomputing Applications released Mosaic in 1993, the first graphical browser to integrate images and text on a single page.
+
+13
+00:01:53,000 --> 00:01:59,362
+Netscape Communications followed in 1994, initiating the commercial browser wars.
+
+14
+00:01:59,362 --> 00:02:06,525
+The Internet Engineering Task Force maintains open standards for internet protocols through a consensus-based process.
+
+15
+00:02:06,525 --> 00:02:12,625
+By 2000, approximately 413 million people used the internet globally.
+
+16
+00:02:12,625 --> 00:02:22,475
+The smartphone revolution, initiated by the iPhone's 2007 release, combined cellular connectivity, touch interfaces, and app ecosystems.
+
+17
+00:02:22,475 --> 00:02:31,437
+As of 2026, over 5.5 billion people are online, representing approximately 68% of the global population.
+
+18
+00:02:31,437 --> 00:02:37,437
+Submarine fiber-optic cables carry over 95% of intercontinental data traffic.
+
+19
+00:02:37,437 --> 00:02:44,862
+The remaining digital divide reflects infrastructure gaps, affordability barriers, and content-language limitations.
+

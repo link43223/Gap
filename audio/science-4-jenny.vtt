@@ -1,0 +1,48 @@
+1
+00:00:00,100 --> 00:00:02,712
+How Does Wi-Fi Actually Work?
+
+2
+00:00:02,662 --> 00:00:19,012
+Wi-Fi transmits data using radio waves in the unlicensed ISM (industrial, scientific, and medical) frequency bands, primarily 2.4 GHz and 5 GHz, with the 6 GHz band opened for Wi-Fi 6E and Wi-Fi 7.
+
+3
+00:00:19,012 --> 00:00:30,687
+Data transmission employs orthogonal frequency-division multiplexing (OFDM), which divides a single data stream across dozens or hundreds of closely spaced subcarrier frequencies.
+
+4
+00:00:30,687 --> 00:00:38,262
+This approach provides high spectral efficiency while resisting interference and multipath fading caused by signal reflections.
+
+5
+00:00:38,262 --> 00:00:46,750
+The Medium Access Control (MAC) layer uses carrier-sense multiple access with collision avoidance (CSMA/CA).
+
+6
+00:00:46,750 --> 00:00:57,275
+Before transmitting, a device listens for ongoing traffic; if the channel is clear, it sends data; if busy, it waits a random backoff period before retrying.
+
+7
+00:00:57,275 --> 00:01:14,487
+Multiple-input multiple-output (MIMO) technology, introduced with 802.11n (Wi-Fi 4) in 2009, uses multiple antennas to transmit and receive several data streams simultaneously, multiplying throughput linearly with antenna count.
+
+8
+00:01:14,487 --> 00:01:40,412
+The IEEE 802.11 family has evolved substantially since the original 1997 standard operating at 2 Mbps. Wi-Fi 6 (802.11ax, 2019) introduces orthogonal frequency-division multiple access (OFDMA), which subdivides channels efficiently among many devices simultaneously — critical for dense environments such as stadiums and office buildings.
+
+9
+00:01:40,412 --> 00:01:52,975
+Wi-Fi 7 (802.11be) promises maximum data rates exceeding 30 Gbps through 320 MHz channel width and 4096-QAM modulation.
+
+10
+00:01:52,975 --> 00:02:06,387
+The branding name Wi-Fi, chosen by the branding firm Interbrand in 1999, does not stand for anything — it was selected for recognizability, contrary to the persistent myth that it abbreviates "wireless fidelity.
+
+11
+00:02:06,387 --> 00:02:18,000
+Signal attenuation follows the inverse square law, but obstacles add significant losses: a typical concrete wall attenuates 2.4 GHz signals by 8-15 dB.
+
+12
+00:02:18,000 --> 00:02:30,212
+Mesh networking systems address coverage gaps by deploying multiple access points that communicate on a dedicated wireless backhaul channel, handing off client devices seamlessly as they move throughout a building.
+

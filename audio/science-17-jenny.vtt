@@ -1,0 +1,52 @@
+1
+00:00:00,100 --> 00:00:02,362
+What Is Quantum Computing?
+
+2
+00:00:02,312 --> 00:00:10,937
+Quantum computers exploit principles of quantum mechanics to solve certain classes of problems exponentially faster than classical computers.
+
+3
+00:00:10,937 --> 00:00:17,550
+Classical computers store information in bits that exist in one of two discrete states: 0 or 1.
+
+4
+00:00:17,550 --> 00:00:24,175
+Quantum computers use qubits, which can exist in a superposition of both states simultaneously.
+
+5
+00:00:24,175 --> 00:00:31,775
+A qubit's state is a complex linear combination of |0⟩ and |1⟩, collapsed to a definite value only upon measurement.
+
+6
+00:00:31,775 --> 00:00:45,700
+A second quantum property, entanglement, links qubits such that measuring one instantly determines the state of its entangled partner, regardless of spatial separation—a phenomenon Einstein called "spooky action at a distance.
+
+7
+00:00:45,700 --> 00:00:57,150
+These properties enable quantum algorithms (Shor's algorithm for integer factorization, Grover's algorithm for unstructured search) to explore vast solution spaces in parallel.
+
+8
+00:00:57,150 --> 00:01:12,562
+In 2019, Google claimed quantum supremacy with its Sycamore processor: a 53-qubit chip solved a random-circuit sampling problem in 200 seconds that the Summit classical supercomputer would require an estimated 10,000 years to complete.
+
+9
+00:01:12,562 --> 00:01:21,887
+IBM challenged the claim, arguing that the classical task could be performed in days with better algorithms, but the milestone accelerated investment.
+
+10
+00:01:21,887 --> 00:01:36,837
+The practical promise of fault-tolerant quantum computing includes simulating molecular interactions for drug discovery and materials science, optimizing logistics and financial portfolios, and breaking RSA encryption via Shor's algorithm.
+
+11
+00:01:36,837 --> 00:01:45,075
+The dominant challenge is decoherence: qubits are exceptionally fragile and lose their quantum properties through interactions with the environment.
+
+12
+00:01:45,075 --> 00:01:54,850
+Superconducting qubits operate at millikelvin temperatures, and error rates remain too high for useful computation without extensive quantum error correction.
+
+13
+00:01:54,850 --> 00:02:02,750
+Building a large-scale, fault-tolerant quantum computer is considered one of the foremost engineering challenges of the 21st century.
+

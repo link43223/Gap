@@ -1,0 +1,76 @@
+1
+00:00:00,100 --> 00:00:02,300
+What Are Stars Made Of?
+
+2
+00:00:02,250 --> 00:00:19,787
+Stars are self-gravitating plasma spheres composed primarily of hydrogen (approximately 73% by mass) and helium (approximately 25%), with trace amounts of heavier elements—collectively termed "metals" in astrophysical terminology—comprising the remaining 2%.
+
+3
+00:00:19,787 --> 00:00:27,625
+Stars form through gravitational collapse of cold molecular clouds (typically 10-20 Kelvin) in the interstellar medium.
+
+4
+00:00:27,625 --> 00:00:36,737
+As the protostar contracts, gravitational potential energy converts to thermal energy, raising core temperature until hydrogen fusion ignites.
+
+5
+00:00:36,737 --> 00:00:40,762
+Two primary fusion pathways operate in stellar cores.
+
+6
+00:00:40,762 --> 00:01:00,187
+In stars of less than approximately 1.5 solar masses, including the Sun, the proton-proton chain dominates: two protons fuse to form deuterium, which captures another proton to form helium-3, and two helium-3 nuclei fuse to produce helium-4, releasing approximately 26.7 MeV per cycle.
+
+7
+00:01:00,187 --> 00:01:11,512
+In more massive stars, the carbon-nitrogen-oxygen (CNO) cycle—where carbon, nitrogen, and oxygen serve as catalysts—accounts for the majority of energy production.
+
+8
+00:01:11,512 --> 00:01:19,612
+The Sun's core reaches temperatures of approximately 15.7 million Kelvin and densities 150 times that of water.
+
+9
+00:01:19,612 --> 00:01:27,787
+The Hertzsprung-Russell diagram classifies stars by spectral type (OBAFGKM, from hottest to coolest) and luminosity class.
+
+10
+00:01:27,787 --> 00:01:38,975
+O-type stars exceed 30,000 Kelvin and show ionized helium lines; M-type stars are cooler than 3,700 Kelvin and display molecular titanium oxide bands.
+
+11
+00:01:38,975 --> 00:01:45,450
+Main-sequence stars fuse hydrogen in their cores for approximately 10 billion years for a solar-mass star.
+
+12
+00:01:45,450 --> 00:01:52,025
+When core hydrogen is exhausted, fusion shifts to a hydrogen-burning shell around an inert helium core.
+
+13
+00:01:52,025 --> 00:01:56,587
+The outer envelope expands and cools, producing a red giant.
+
+14
+00:01:56,587 --> 00:02:05,912
+Helium ignition proceeds via the triple-alpha process—three helium-4 nuclei fusing to carbon-12—at approximately 100 million Kelvin.
+
+15
+00:02:05,912 --> 00:02:16,975
+In stars above approximately 8 solar masses, successive fusion stages produce silicon, sulfur, and finally iron-56, at which point further fusion is endothermic.
+
+16
+00:02:16,975 --> 00:02:24,200
+The core collapses in under a second, triggering a Type II supernova that enriches the interstellar medium with heavy elements.
+
+17
+00:02:24,200 --> 00:02:34,700
+The B2FH paper (Burbidge, Burbidge, Fowler, and Hoyle, 1957) established the theoretical framework for stellar nucleosynthesis.
+
+18
+00:02:34,700 --> 00:02:40,625
+Every element heavier than helium—except trace amounts from the Big Bang—originated in stars.
+
+19
+00:02:40,625 --> 00:02:55,375
+Carbon and oxygen in biological molecules were synthesized in red giant and supernova progenitors; iron in hemoglobin was forged in silicon-burning shells of massive stars; gold and uranium were produced in neutron-star mergers detected as kilonovae.
+

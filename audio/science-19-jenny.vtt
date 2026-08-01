@@ -1,0 +1,52 @@
+1
+00:00:00,100 --> 00:00:02,800
+How Your Voice Travels Through a Phone.
+
+2
+00:00:02,750 --> 00:00:13,412
+Voice transmission across modern telephone networks involves a complex pipeline of analog-to-digital conversion, compression, packetization, routing, and reassembly.
+
+3
+00:00:13,412 --> 00:00:23,475
+A microphone diaphragm vibrates in response to acoustic pressure waves; a condenser element or electret translates these vibrations into an analog electrical signal.
+
+4
+00:00:23,475 --> 00:00:40,775
+This signal passes through an analog-to-digital converter (ADC) that samples the voltage level at a rate of 8,000-48,000 times per second (standard telephony uses 8 kHz with 8-bit mu-law or A-law companding, yielding 64 kbps per channel).
+
+5
+00:00:40,775 --> 00:00:48,112
+Each sample is quantized into a binary value, producing a raw pulse-code modulation (PCM) stream.
+
+6
+00:00:48,112 --> 00:01:02,187
+This stream is compressed using codecs such as Adaptive Multi-Rate (AMR) or Opus, which discard psychoacoustically irrelevant data to reduce bandwidth requirements to as low as 6-12 kbps on cellular networks.
+
+7
+00:01:02,187 --> 00:01:09,912
+The compressed data is segmented into packets of 10-30 milliseconds, each tagged with sequence numbers and timestamps.
+
+8
+00:01:09,912 --> 00:01:20,637
+In Voice over IP (VoIP) systems, these packets are encapsulated in Real-time Transport Protocol (RTP) over UDP and routed across IP networks.
+
+9
+00:01:20,637 --> 00:01:28,300
+In traditional circuit-switched telephony, the PCM stream is time-division multiplexed over T-carrier lines or fiber.
+
+10
+00:01:28,300 --> 00:01:35,550
+Packets traverse the network via potentially different routes, reassembled at the destination using sequence numbers.
+
+11
+00:01:35,550 --> 00:01:42,975
+At the receiving end, a digital-to-analog converter reconstructs the analog signal, which drives a speaker diaphragm.
+
+12
+00:01:42,975 --> 00:01:54,062
+Total end-to-end latency for voice calls typically ranges from 50-150 milliseconds; at levels below 150 ms, conversation feels natural.
+
+13
+00:01:54,062 --> 00:02:02,125
+The PSTN 64 kbps standard was established in the 1960s and remains foundational to digital telephony.
+

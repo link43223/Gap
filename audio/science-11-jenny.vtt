@@ -1,0 +1,72 @@
+1
+00:00:00,100 --> 00:00:02,612
+The Amazing World of DNA.
+
+2
+00:00:02,562 --> 00:00:10,425
+DNA (deoxyribonucleic acid) carries the genetic instructions for all known cellular life and many viruses.
+
+3
+00:00:10,425 --> 00:00:26,112
+The molecule consists of two polynucleotide chains coiled in a right-handed double helix, a structure determined by James Watson and Francis Crick in 1953 using X-ray diffraction data from Rosalind Franklin and Raymond Gosling at King's College London.
+
+4
+00:00:26,112 --> 00:00:41,450
+Each chain comprises a phosphate-deoxyribose backbone connected by covalent phosphodiester bonds, with one of four nitrogenous bases attached to each sugar: adenine (A), thymine (T), guanine (G), and cytosine (C).
+
+5
+00:00:41,450 --> 00:00:51,625
+Base pairing follows strict complementarity: A bonds with T via two hydrogen bonds, G with C via three, making G-C pairs thermodynamically more stable.
+
+6
+00:00:51,625 --> 00:01:01,437
+The antiparallel orientation of the two strands — one running 5' to 3', the other 3' to 5' — is fundamental to replication and transcription.
+
+7
+00:01:01,437 --> 00:01:13,925
+During replication, helicase unwinds the parental duplex, DNA polymerase synthesizes new strands complementary to each template, and DNA ligase seals Okazaki fragments on the lagging strand.
+
+8
+00:01:13,925 --> 00:01:19,887
+Proofreading exonuclease activity reduces error rates below one per billion nucleotides.
+
+9
+00:01:19,887 --> 00:01:34,887
+The sequence of bases encodes proteins through the genetic code: non-overlapping triplets (codons) specify 20 standard amino acids, with redundancy since 64 possible codons map to 20 amino acids plus three stop signals.
+
+10
+00:01:34,887 --> 00:01:43,437
+A single gene typically contains both coding exons and non-coding introns, which are spliced out of pre-messenger RNA transcripts.
+
+11
+00:01:43,437 --> 00:01:50,812
+The human genome spans approximately 3.1 billion base pairs distributed across 23 chromosome pairs.
+
+12
+00:01:50,812 --> 00:02:02,387
+Only about 1-2% codes for proteins; the remainder includes regulatory elements, non-coding RNA genes, telomeres, centromeres, and transposable elements.
+
+13
+00:02:02,387 --> 00:02:20,362
+Epigenetic modifications — DNA methylation at CpG islands and post-translational histone modifications — alter chromatin structure and gene expression without changing the DNA sequence itself, enabling cellular differentiation and mediating environmental influences on phenotype.
+
+14
+00:02:20,362 --> 00:02:24,575
+DNA sequencing has advanced at a rate exceeding Moore's Law.
+
+15
+00:02:24,575 --> 00:02:38,950
+The first human genome cost 3 billion dollars and took 13 years; today, whole-genome sequencing costs under 600 dollars and takes days using next-generation platforms that parallelize millions of sequencing reactions.
+
+16
+00:02:38,950 --> 00:02:49,087
+CRISPR-Cas9, adapted from Streptococcus pyogenes, introduces targeted double-strand breaks that can be repaired to disrupt genes or insert new sequences.
+
+17
+00:02:49,087 --> 00:02:59,912
+The first CRISPR-based therapy, exagamglogene autotemcel (Casgevy), received regulatory approval in 2023 for sickle cell disease and beta-thalassemia.
+
+18
+00:02:59,912 --> 00:03:04,987
+Ethical debates continue regarding germline editing and genetic data privacy.
+

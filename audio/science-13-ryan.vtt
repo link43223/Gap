@@ -1,0 +1,60 @@
+1
+00:00:00,100 --> 00:00:02,825
+What Is Artificial Intelligence?
+
+2
+00:00:02,775 --> 00:00:14,875
+Artificial intelligence encompasses systems that perform tasks requiring human-like cognition: visual recognition, natural language understanding, strategic decision-making, and creative generation.
+
+3
+00:00:14,875 --> 00:00:23,725
+Modern AI is founded on machine learning, where algorithms extract statistical regularities from data rather than executing hand-coded rules.
+
+4
+00:00:23,725 --> 00:00:30,775
+Deep learning, a subfield, uses artificial neural networks with multiple layers between input and output.
+
+5
+00:00:30,775 --> 00:00:42,612
+Each layer transforms its input through learned weights and nonlinear activation functions, enabling hierarchical feature extraction — from raw pixels to edges, shapes, objects, and scenes.
+
+6
+00:00:42,612 --> 00:00:52,287
+Convolutional neural networks excel at spatial data like images, while recurrent architectures were long used for sequential data before being largely superseded.
+
+7
+00:00:52,287 --> 00:01:04,925
+The transformer architecture, introduced by Vaswani et al. in 2017, revolutionized the field through self-attention, which computes contextual relationships between all positions in a sequence simultaneously.
+
+8
+00:01:04,925 --> 00:01:19,375
+Large language models (LLMs) trained on trillions of tokens demonstrate emergent capabilities: translation across hundreds of languages, code generation in multiple programming languages, logical reasoning, and multi-turn dialogue.
+
+9
+00:01:19,375 --> 00:01:39,000
+Scaling laws, systematically characterized by Kaplan et al. in 2020, show that model performance follows predictable power-law improvements with increases in parameter count, training data, and compute — though diminishing returns and physical constraints are driving research into sparse and more efficient architectures such as mixture-of-experts.
+
+10
+00:01:39,000 --> 00:01:51,062
+Training frontier models requires enormous resources: GPT-4 reportedly consumed tens of thousands of GPUs operating for months, with total costs exceeding 100 million dollars.
+
+11
+00:01:51,062 --> 00:02:01,187
+Reinforcement learning from human feedback (RLHF) fine-tunes outputs to align with human preferences by training a reward model on human-rated responses.
+
+12
+00:02:01,187 --> 00:02:08,387
+Despite these advances, contemporary AI lacks genuine understanding, consciousness, and causal reasoning.
+
+13
+00:02:08,387 --> 00:02:16,337
+Systems hallucinate — producing plausible but factually incorrect statements — and amplify biases embedded in training corpora.
+
+14
+00:02:16,337 --> 00:02:28,625
+Safety research addresses robustness, interpretability, and alignment, while regulators worldwide develop frameworks governing training data provenance, model evaluation, and deployment transparency.
+
+15
+00:02:28,625 --> 00:02:33,775
+The trajectory of the field depends on resolving these technical and governance challenges.
+

@@ -1,0 +1,44 @@
+1
+00:00:00,100 --> 00:00:02,112
+Why Is the Sky Blue?
+
+2
+00:00:02,062 --> 00:00:11,200
+Sunlight consists of electromagnetic radiation across the visible spectrum, appearing white when all wavelengths are present in roughly equal intensity.
+
+3
+00:00:11,200 --> 00:00:28,950
+As sunlight enters Earth's atmosphere, it interacts with gas molecules — primarily nitrogen (78%) and oxygen (21%) — through Rayleigh scattering, named after British physicist Lord Rayleigh, who published the mathematical formulation in 1871.
+
+4
+00:00:28,950 --> 00:00:34,912
+The scattering cross-section is inversely proportional to the fourth power of the wavelength (λ⁻⁴).
+
+5
+00:00:34,912 --> 00:00:43,875
+Blue light at approximately 450 nanometers is scattered roughly ten times more efficiently than red light at 650 nanometers.
+
+6
+00:00:43,875 --> 00:00:50,312
+An observer looking at the sky away from the direct solar beam sees predominantly the scattered blue component.
+
+7
+00:00:50,312 --> 00:01:01,437
+The phenomenon is distinct from Mie scattering, which involves particles comparable in size to the wavelength (such as water droplets and dust), and produces the white appearance of clouds.
+
+8
+00:01:01,437 --> 00:01:10,100
+At sunrise and sunset, sunlight traverses a much longer path through the atmosphere — roughly 30 times the atmospheric thickness at noon.
+
+9
+00:01:10,100 --> 00:01:23,862
+The increased optical depth results in nearly complete removal of blue wavelengths through multiple scattering events, leaving the longer red and orange wavelengths (600-700 nm) to reach the observer's line of sight.
+
+10
+00:01:23,862 --> 00:01:34,650
+This mechanism also explains why the sky on Mars, with its thin carbon dioxide atmosphere and suspended iron oxide dust, appears butterscotch-colored during daytime.
+
+11
+00:01:34,650 --> 00:01:42,050
+On the Moon, which lacks any significant atmosphere, the sky remains perpetually black regardless of solar angle.
+

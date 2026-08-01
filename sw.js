@@ -1,5 +1,5 @@
 // Gap Service Worker - 离线缓存
-var CACHE = "gap-v13";
+var CACHE = "gap-v22";
 var FILES = [
     "/",
     "/index.html",

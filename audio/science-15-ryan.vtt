@@ -1,0 +1,60 @@
+1
+00:00:00,100 --> 00:00:02,700
+How Do 3D Printers Work?
+
+2
+00:00:02,650 --> 00:00:11,337
+Three-dimensional printing, formally additive manufacturing, constructs objects by depositing material layer by layer from a digital model.
+
+3
+00:00:11,337 --> 00:00:20,875
+The process begins with a computer-aided design file, which slicing software divides into horizontal cross-sections typically 20 to 200 micrometers thick.
+
+4
+00:00:20,875 --> 00:00:41,500
+Unlike subtractive manufacturing (cutting from solid blocks) or formative manufacturing (molding), additive processes produce minimal waste — often below 5% material loss — and enable geometries impossible with conventional techniques: internal lattice structures, conformal cooling channels, and topology-optimized components.
+
+5
+00:00:41,500 --> 00:01:02,075
+Fused deposition modeling (FDM), patented by Scott Crump in 1989 and the most widespread technique, feeds thermoplastic filament — commonly acrylonitrile butadiene styrene (ABS), polylactic acid (PLA), or polycarbonate — through a heated nozzle at 190 to 260 degrees Celsius.
+
+6
+00:01:02,075 --> 00:01:10,537
+The nozzle deposits molten material along computer-defined toolpaths in the X-Y plane, then the build platform descends by one layer height.
+
+7
+00:01:10,537 --> 00:01:20,000
+FDM produces anisotropic parts; interlayer adhesion is weaker than in-plane strength, typically 50-80% of bulk material properties.
+
+8
+00:01:20,000 --> 00:01:30,462
+Stereolithography (SLA), patented by Charles Hull in 1984, uses an ultraviolet laser to selectively cure liquid photopolymer resin in a vat.
+
+9
+00:01:30,462 --> 00:01:37,737
+Each layer is traced by the laser, polymerizing the resin through photoinitiation, then the build platform shifts.
+
+10
+00:01:37,737 --> 00:01:49,737
+SLA achieves layer thicknesses as small as 25 micrometers, making it suitable for dental models, hearing aid shells, jewelry casting patterns, and microfluidic devices.
+
+11
+00:01:49,737 --> 00:01:57,912
+Digital light processing (DLP) cures entire layers simultaneously using a projected image, accelerating production.
+
+12
+00:01:57,912 --> 00:02:11,750
+Industrial techniques include selective laser sintering (SLS), which fuses polymer or metal powder with a laser, and electron beam melting (EBM), which uses an electron beam in vacuum for titanium and cobalt-chrome alloys.
+
+13
+00:02:11,750 --> 00:02:18,050
+These methods produce fully dense metal parts for aerospace engine components and orthopedic implants.
+
+14
+00:02:18,050 --> 00:02:30,175
+Medical bioprinting deposits living cells in hydrogel scaffolds; researchers have printed vascularized cardiac patches and cartilage constructs, though functional transplantable organs remain distant.
+
+15
+00:02:30,175 --> 00:02:38,787
+The global additive manufacturing market exceeded 15 billion dollars in 2023 and continues to grow at roughly 20% annually.
+

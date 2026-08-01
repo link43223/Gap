@@ -1,0 +1,80 @@
+1
+00:00:00,100 --> 00:00:02,912
+How Does GPS Find Your Location?
+
+2
+00:00:02,862 --> 00:00:10,925
+The Global Positioning System (GPS) is a space-based radio-navigation system operated by the United States Space Force.
+
+3
+00:00:10,925 --> 00:00:27,425
+The operational constellation comprises 31 satellites orbiting at an altitude of 20,180 km in six orbital planes inclined at 55 degrees to the equator, ensuring at least four satellites are visible from any point on Earth at all times.
+
+4
+00:00:27,425 --> 00:00:59,787
+Each satellite continuously broadcasts on three L-band frequencies: L1 (1575.42 MHz) carries the coarse/acquisition code and navigation message; L2 (1227.60 MHz) broadcasts the precise P(Y) code for military use and civilian L2C signals; L5 (1176.45 MHz) provides the safety-of-life signal with higher power and wider bandwidth.
+
+5
+00:00:59,787 --> 00:01:10,450
+The navigation message includes satellite ephemeris data (precise orbital parameters), almanac data (approximate parameters for all satellites), and clock corrections.
+
+6
+00:01:10,450 --> 00:01:14,075
+Position determination relies on trilateration.
+
+7
+00:01:14,075 --> 00:01:19,325
+A receiver measures the time of flight of radio signals from at least four satellites.
+
+8
+00:01:19,325 --> 00:01:25,075
+Multiplying the propagation delay by the speed of light yields the pseudorange to each satellite.
+
+9
+00:01:25,075 --> 00:01:32,562
+Three satellites provide three-dimensional position; the fourth resolves the receiver's clock error relative to GPS time.
+
+10
+00:01:32,562 --> 00:01:37,875
+Standard civilian accuracy is approximately 3-5 meters horizontally.
+
+11
+00:01:37,875 --> 00:01:42,075
+Relativistic effects are critical to GPS accuracy.
+
+12
+00:01:42,075 --> 00:01:53,350
+General relativity predicts that satellite clocks at orbital altitude run faster than surface clocks by approximately 45 microseconds per day due to weaker gravitational potential.
+
+13
+00:01:53,350 --> 00:02:03,900
+Special relativity predicts satellite clocks run slower by approximately 7 microseconds per day due to their orbital velocity of 3.87 km/s.
+
+14
+00:02:03,900 --> 00:02:13,562
+The net offset of approximately 38 microseconds per day, if uncorrected, would accumulate to a positional error of approximately 10 km per day.
+
+15
+00:02:13,562 --> 00:02:24,125
+Satellite oscillators are tuned to 10.22999999543 MHz instead of 10.23 MHz before launch to compensate.
+
+16
+00:02:24,125 --> 00:02:33,300
+GPS became fully operational in 1995 following a development program begun in 1973 under Colonel Bradford Parkinson.
+
+17
+00:02:33,300 --> 00:02:42,237
+The 1983 downing of Korean Air Lines Flight 007 prompted President Ronald Reagan to open GPS for civilian use.
+
+18
+00:02:42,237 --> 00:02:53,425
+Selective Availability—intentional degradation of civilian signals—was terminated by President Bill Clinton in May 2000, dramatically improving civilian accuracy.
+
+19
+00:02:53,425 --> 00:03:09,137
+Four global navigation satellite systems now exist: GPS (United States), GLONASS (Russia), Galileo (European Union, fully operational since 2016), and BeiDou (China, global coverage since 2020).
+
+20
+00:03:09,137 --> 00:03:19,975
+Differential GPS using fixed reference stations achieves sub-meter accuracy, while real-time kinematic positioning achieves centimeter-level precision using carrier-phase measurements.
+
