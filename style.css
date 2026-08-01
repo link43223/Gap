@@ -987,7 +987,6 @@ body.dark .overlay { background: rgba(0,0,0,0.6); }
 body.dark .back-btn { color: #4da3ff; }
 body.dark .panel-header h2 { color: #e5e5ea; }
 body.dark .text-btn { background: #333; color: #ccc; border-color: #444; }
-body.dark .export-btn { background: #333; color: #ccc; border-color: #444; }
 body.dark .empty-hint { color: #666; }
 body.dark .article-source { color: #666; }
 body.dark .article-image-caption { color: #666; }
