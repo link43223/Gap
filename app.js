@@ -291,6 +291,13 @@ document.addEventListener("DOMContentLoaded", function() {
     initAccent();
     initDisplaySettings();
     showArticleList("science");
+    // 页面隐藏/切后台/离开时停止朗读，防止退出文章后继续播放（机器音 bug 兜底）
+    document.addEventListener("visibilitychange", function() {
+        if (document.hidden && TTS.on) ttsStop();
+    });
+    window.addEventListener("pagehide", function() {
+        if (TTS.on) ttsStop();
+    });
 });
 
 // ==========================================
@@ -609,6 +616,7 @@ async function lookupWord(word, element) {
             ' <span class="speaker-icon" onclick="playPronunciation(\'' + word.replace(/'/g, "\\'") + '\')" title="播放读音"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19 11,5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></svg></span>';
     document.getElementById("popupMeaning").textContent = "查询中...";
     popup.classList.add("show");
+    ttsUpdateBar(); // 查词弹窗打开 → 淡出隐藏底部控制条
     document.getElementById("overlay").style.display = "block";
     var saveBtn = document.getElementById("saveWordBtn");
     if (isInWordBank(getBaseWord(word), currentArticleKey)) {
@@ -1001,6 +1009,7 @@ function closePopup() {
     document.getElementById("overlay").style.display = "none";
     if (currentWordElement) currentWordElement.classList.remove("tapped");
     currentWord = ""; currentWordElement = null;
+    ttsUpdateBar(); // 弹窗关闭后，若仍在朗读则淡入恢复控制条
 }
 
 document.addEventListener("click", function(e) {
@@ -1231,13 +1240,17 @@ function ttsChunkText(text) {
 }
 
 function ttsSpeakNextChunk() {
+    if (!TTS.on || TTS.paused) return; // 已停止/暂停则不再继续
     if (TTS.subIndex >= TTS.subChunks.length) { ttsSpeakAt(TTS.index + 1); return; }
     var text = TTS.subChunks[TTS.subIndex++];
     var u = new SpeechSynthesisUtterance(text);
     if (TTS.voice) { u.voice = TTS.voice; u.lang = TTS.voice.lang || "en-US"; }
     else { u.lang = "en-US"; }
     u.rate = TTS.rate;
-    u.onend = function() { ttsSpeakNextChunk(); };
+    u.onend = function() {
+        if (!TTS.on || TTS.paused) return; // 防 Chrome cancel bug 后链式继续
+        ttsSpeakNextChunk();
+    };
     u.onerror = function() { ttsStop(); };
     TTS.utter = u;
     speechSynthesis.speak(u);
@@ -1271,19 +1284,24 @@ function ttsStart() {
     var a = new Audio(mp3Url);
     a.preload = "auto";
     a.playbackRate = TTS.rate;
-    a.addEventListener("timeupdate", ttsOnAudioTime);
-    a.addEventListener("ended", function() { ttsStop(); });
-    a.addEventListener("error", function() {
-        // mp3 加载失败 → 降级系统语音
+
+    // mp3 加载失败 → 降级系统语音；但须校验"用户仍在听这篇"，防止退出/切换时
+    // ttsStop 清空 src 触发的 play() reject 误降级重启系统语音（机器音 bug 根因）
+    var startedForKey = key;
+    function ttsFallbackToSpeech() {
+        if (!TTS.on) return;                          // 用户已停止/退出
+        if (TTS.audio !== a) return;                  // audio 已被替换/清空
+        if (currentArticleKey !== startedForKey) return; // 已切到其他文章
         ttsStop();
         ttsStartSpeech();
-    });
+    }
+
+    a.addEventListener("timeupdate", ttsOnAudioTime);
+    a.addEventListener("ended", function() { ttsStop(); });
+    a.addEventListener("error", ttsFallbackToSpeech);
     var playPromise = a.play();
     if (playPromise && playPromise.catch) {
-        playPromise.catch(function() {
-            ttsStop();
-            ttsStartSpeech();
-        });
+        playPromise.catch(ttsFallbackToSpeech);
     }
 
     // 先进入播放状态（不依赖 VTT，VTT 只用于句子高亮）
@@ -1303,6 +1321,7 @@ function ttsStart() {
             var cues = ttsParseVTT(txt);
             if (!cues.length) throw new Error("empty vtt");
             TTS.cues = cues;
+            ttsUpdateBar(); // 句子时间戳就绪后刷新进度显示
         })
         .catch(function() {});
 }
@@ -1365,6 +1384,7 @@ function ttsHighlightCue(cueIdx) {
     for (var i = 0; i < TTS.sentences.length; i++) TTS.sentences[i].classList.remove("tts-reading");
     if (!target) return;
     target.classList.add("tts-reading");
+    ttsUpdateBar(); // 同步句子进度
     var r = target.getBoundingClientRect(), vh = window.innerHeight;
     if (r.top < 80 || r.bottom > vh - 140) {
         target.scrollIntoView({ block: "center", behavior: "smooth" });
@@ -1374,6 +1394,7 @@ function ttsHighlightCue(cueIdx) {
 // speech 降级模式
 function ttsStartSpeech() {
     if (!TTS.supported) return;
+    if (!TTS.on) return; // 用户已停止/退出，不再降级启动系统语音
     if (speechSynthesis.speaking) speechSynthesis.cancel();
     ttsEnsureVoices();
     var content = document.getElementById("articleContent");
@@ -1492,6 +1513,7 @@ function ttsHighlight(i) {
     var el = TTS.sentences[i];
     if (!el) return;
     el.classList.add("tts-reading");
+    ttsUpdateBar(); // 同步句子进度
     var r = el.getBoundingClientRect(), vh = window.innerHeight;
     if (r.top < 80 || r.bottom > vh - 140) {
         el.scrollIntoView({ block: "center", behavior: "smooth" });
@@ -1512,6 +1534,32 @@ function ttsUpdateUI() {
     }
     ttsSyncVoiceBtns();
     ttsSyncRateBtns();
+    ttsUpdateBar();
+}
+
+// 底部悬浮播放控制条：朗读时显示、播放按钮文案、句子进度
+function ttsUpdateBar() {
+    var bar = document.getElementById("ttsBar");
+    if (!bar) return;
+    // 仅在文章详情页可见时才显示控制条（切到别的页面则隐藏）
+    var detail = document.getElementById("articleDetailView");
+    // 查词弹窗打开时也要隐藏控制条，避免挡住"翻译整句"等弹窗底部按钮
+    var popup = document.getElementById("wordPopup");
+    var popupOpen = popup && popup.classList.contains("show");
+    var visible = TTS.on && detail && detail.style.display !== "none" && !popupOpen;
+    bar.classList.toggle("show", visible);
+    var playBtn = document.getElementById("ttsPlayBtn");
+    if (playBtn) {
+        // 播放中 → 显示"两条竖杠"暂停图标（无填充底）；暂停/未播放 → 显示"三角"播放图标（填充底）
+        var isPausedIcon = TTS.on && !TTS.paused;
+        playBtn.innerHTML = isPausedIcon
+            ? '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>'
+            : '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
+        playBtn.classList.toggle("paused", isPausedIcon);
+    }
+    var total = (TTS.mode === "audio") ? TTS.cues.length : TTS.sentences.length;
+    var prog = document.getElementById("ttsProgress");
+    if (prog) prog.textContent = total > 0 ? (TTS.index + 1) + " / " + total : "";
 }
 
 function ttsOnArticleLoad() {

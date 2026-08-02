@@ -178,6 +178,15 @@
 
 </div>
 
+<!-- TTS 播放控制条：放在 container 外，避免受文章详情 transform 影响导致 fixed 失效 -->
+<div id="ttsBar" class="tts-bar-fixed">
+    <button class="tts-btn" id="ttsPlayBtn" onclick="ttsToggle()" title="播放/暂停"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></button>
+    <button class="tts-btn small" onclick="ttsPrev()" title="上一句">⏮</button>
+    <button class="tts-btn small" onclick="ttsNext()" title="下一句">⏭</button>
+    <span id="ttsProgress" class="tts-progress">0 / 0</span>
+    <button class="tts-btn small" onclick="ttsStop()" title="停止">✕</button>
+</div>
+
 <script>if("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js");</script>
 <script src="articles.js"></script>
 <script src="dict-zh.js"></script>

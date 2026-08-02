@@ -604,9 +604,22 @@ body.dark .ali-title-cn { color: #e5e5ea; }
     font-weight: 600;
     cursor: pointer;
     font-family: inherit;
+    display: inline-flex;         /* 让图标垂直居中 */
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
 }
 
 .tts-btn:active { opacity: 0.85; }
+
+/* 暂停状态：只显示两条竖杠图标，不要黄色填充底（描边样式） */
+.tts-btn.paused {
+    background: transparent;
+    color: var(--accent);
+    border: 2px solid var(--accent);
+    box-sizing: border-box;
+    padding: 6px 18px; /* 边框占 2px，保持与播放按钮总尺寸一致 */
+}
 
 .tts-btn.small {
     padding: 6px 10px;
@@ -1067,5 +1080,41 @@ body.dark .toggle-slider { background-color: #444; }
 body.dark .topic-label { color: #999; }
 body.dark .speaker-icon { background: #1e3a5f; color: #4da3ff; }
 body.dark .article-title-row h2 { color: #e5e5ea; }
+
+/* === 底部悬浮 TTS 播放控制条 === */
+.tts-bar-fixed {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    width: min(calc(100% - 24px), 696px); /* 手机全宽减 24px，桌面限制 696px 居中 */
+    z-index: 300;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.96);
+    border-radius: 14px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+.tts-bar-fixed.show {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+body.dark .tts-bar-fixed { background: rgba(37, 37, 64, 0.96); }
+.tts-progress {
+    flex: 1;
+    text-align: center;
+    font-size: 13px;
+    color: #aeaeb2;
+    white-space: nowrap;
+}
 
 
