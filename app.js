@@ -401,8 +401,12 @@ function isAbbrevAt(text, dotIdx) {
     while (start > 0 && /\S/.test(text[start - 1])) start--;
     var word = text.substring(start, dotIdx).toLowerCase();
     if (!word) return false;
+    // 点前后都是字母/数字 → 缩写内或小数（e.g. / Ph.D. / 3.14 / U.S. / a.m.），不视为句末
+    var before = dotIdx > 0 ? text[dotIdx - 1] : "";
+    var after = dotIdx + 1 < text.length ? text[dotIdx + 1] : "";
+    if (/[a-zA-Z0-9]/.test(before) && /[a-zA-Z0-9]/.test(after)) return true;
     var core = word.replace(/\./g, "");
-    return /^(mr|mrs|ms|dr|st|sr|jr|vs|etc|inc|ltd|co|prof|rev|hon|dept|ave|blvd|apt|no|nos|mt|ft|sec|min|hr|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec|us|uk|fig|vol|eds|al|est|approx|east|west|north|south)$/i.test(core);
+    return /^(mr|mrs|ms|dr|st|sr|jr|vs|etc|inc|ltd|co|prof|rev|hon|dept|ave|blvd|apt|no|nos|mt|ft|sec|min|hr|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec|us|uk|fig|vol|eds|al|est|approx|east|west|north|south|eg|ie|phd|md|bc|ad)$/i.test(core);
 }
 
 // 按句子切分英文文本（供朗读/高亮使用）
@@ -439,7 +443,8 @@ function makeWordsClickable(container, text) {
         var tokens = sentences[si].split(/(\s+)/);
         tokens.forEach(function(token) {
             if (/^\s+$/.test(token)) { sentEl.appendChild(document.createTextNode(token)); return; }
-            var match = token.match(/^([a-zA-Z]+)([\.,;:!\?\)\]\"\']*)$/);
+            // 支持英文缩写作为一个整体词（don't / it's / can't / shouldn't ...）
+            var match = token.match(/^([a-zA-Z]+(?:'[a-zA-Z]+)?)([.,;:!?)\]"']*)$/);
             if (match) {
                 var word = match[1], punct = match[2];
                 var span = document.createElement("span");
