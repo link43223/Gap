@@ -1117,4 +1117,242 @@ body.dark .tts-bar-fixed { background: rgba(37, 37, 64, 0.96); }
     white-space: nowrap;
 }
 
+/* === 单词复习：入口按钮 === */
+.review-start-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 16px;
+    margin-bottom: 12px;
+    border: none;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--accent), #005bb5);
+    color: white;
+    cursor: pointer;
+    font-family: inherit;
+    box-shadow: 0 4px 14px rgba(0, 113, 227, 0.25);
+    transition: transform 0.15s ease;
+}
+.review-start-btn:active { transform: scale(0.98); }
+.review-start-text { font-size: 16px; font-weight: 600; }
+.review-start-badge {
+    margin-left: auto;
+    font-size: 13px;
+    background: rgba(255, 255, 255, 0.22);
+    padding: 4px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+/* 菜单角标 */
+.menu-badge {
+    float: right;
+    margin-left: 10px;
+    background: var(--accent);
+    color: white;
+    font-size: 11px;
+    line-height: 18px;
+    min-width: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    text-align: center;
+}
+
+/* === 闪卡 === */
+.flash-card {
+    perspective: 1000px;
+    width: 100%;
+    height: 320px;
+    margin: 16px 0 12px;
+    cursor: pointer;
+}
+.flash-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.35s ease;
+}
+.flash-card.flipped .flash-card-inner { transform: rotateY(180deg); }
+.flash-face, .flash-back {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: 20px;
+    background: #ffffff;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 24px;
+}
+.flash-back { transform: rotateY(180deg); }
+.flash-word {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 44px;
+    font-weight: 500;
+    color: #1a1a2e;
+    text-align: center;
+    word-break: break-word;
+}
+.flash-phonetic-row { display: flex; align-items: center; gap: 8px; }
+.flash-phonetic { font-size: 16px; color: #8e8e93; }
+.flash-audio {
+    border: none;
+    background: var(--accent-light, #e8f0fe);
+    color: var(--accent);
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-family: inherit;
+}
+.flash-hint {
+    position: absolute;
+    bottom: 18px;
+    font-size: 12px;
+    color: #aeaeb2;
+}
+.flash-word-back {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 26px;
+    color: var(--accent);
+    text-align: center;
+}
+.flash-meaning {
+    font-size: 16px;
+    color: #3a3a3c;
+    text-align: center;
+    line-height: 1.6;
+    max-height: 160px;
+    overflow-y: auto;
+}
+.flash-source {
+    border: none;
+    background: #f5f5f7;
+    color: var(--accent);
+    font-size: 13px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+/* 进度条 */
+.review-progress {
+    height: 6px;
+    background: #e5e5ea;
+    border-radius: 3px;
+    overflow: hidden;
+    margin: 4px 0 16px;
+}
+.review-progress-bar {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+.review-progress-label { font-size: 13px; color: #8e8e93; }
+
+/* 三档按钮 */
+.review-actions { display: flex; gap: 8px; }
+.review-rate-btn {
+    flex: 1;
+    padding: 14px 0;
+    border: none;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    font-family: inherit;
+    transition: transform 0.15s ease, opacity 0.2s;
+}
+.review-rate-btn:active { transform: scale(0.96); }
+.rate-good { background: #34c759; }
+.rate-hard { background: #f59e0b; }
+.rate-again { background: #ff3b30; }
+/* 评分后：三个评分按钮淡出 */
+.review-rate-btn.rating-fade {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.95);
+}
+/* 释义确认后的"下一个"按钮 */
+.rate-next {
+    background: var(--accent, #0071e3);
+    box-shadow: 0 4px 14px rgba(0, 113, 227, 0.25);
+}
+
+/* 完成页 / 空状态 */
+.review-result, .review-empty {
+    text-align: center;
+    padding: 32px 8px;
+}
+.review-result-icon { font-size: 44px; }
+.review-result-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin: 12px 0 20px;
+}
+.review-result-stats {
+    background: #f5f5f7;
+    border-radius: 16px;
+    padding: 8px 16px;
+    margin: 0 auto 16px;
+    max-width: 300px;
+}
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    font-size: 15px;
+    color: #3a3a3c;
+    border-bottom: 1px solid #e5e5ea;
+}
+.stat-row:last-child { border-bottom: none; }
+.stat-good { color: #34c759; font-weight: 600; }
+.stat-hard { color: #f59e0b; font-weight: 600; }
+.stat-again { color: #ff3b30; font-weight: 600; }
+.stat-rate { color: var(--accent); font-weight: 700; }
+.review-result-extra {
+    font-size: 13px;
+    color: #8e8e93;
+    margin-bottom: 20px;
+}
+.review-result-actions {
+    display: flex;
+    gap: 10px;
+    max-width: 320px;
+    margin: 0 auto;
+}
+.review-empty-desc {
+    font-size: 14px;
+    color: #8e8e93;
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+/* 深色模式 */
+body.dark .flash-face, body.dark .flash-back { background: #252540; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4); }
+body.dark .flash-word { color: #e5e5ea; }
+body.dark .flash-meaning { color: #ccc; }
+body.dark .flash-source { background: #333; color: #4da3ff; }
+body.dark .flash-hint { color: #666; }
+body.dark .flash-audio { background: #1e3a5f; color: #4da3ff; }
+body.dark .review-progress { background: #333; }
+body.dark .review-progress-label { color: #999; }
+body.dark .review-result-title { color: #e5e5ea; }
+body.dark .review-result-stats { background: #1e1e35; }
+body.dark .stat-row { color: #ccc; border-color: #333; }
+body.dark .review-result-extra { color: #999; }
+body.dark .review-empty-desc { color: #999; }
+
 

@@ -49,17 +49,147 @@ function addToWordBank(word, meaning, articleKey, articleTitle) {
     if (!bank.find(function(item) { return item.word === word && item.articleKey === articleKey; })) {
         bank.unshift({ word: word, meaning: meaning, time: new Date().toISOString(), articleKey: articleKey, articleTitle: articleTitle });
         localStorage.setItem("gap_wordbank", JSON.stringify(bank));
+        // 自动建复习卡（学习闭环：查词 → 复习）
+        upsertReviewCard(word, meaning, articleKey, articleTitle);
     }
+}
+
+function isInWordBank(word, articleKey) {
+    return getWordBank().some(function(item) { return item.word === word && item.articleKey === articleKey; });
 }
 
 function removeFromWordBank(word, articleKey) {
     var bank = getWordBank();
     bank = bank.filter(function(item) { return !(item.word === word && item.articleKey === articleKey); });
     localStorage.setItem("gap_wordbank", JSON.stringify(bank));
+    // 单词库中该词已全部删除 → 同步删复习卡
+    var base = getBaseWord(word);
+    var stillExists = bank.some(function(item) { return item.word === base; });
+    if (!stillExists) removeReviewCard(base);
 }
 
-function isInWordBank(word, articleKey) {
-    return getWordBank().some(function(item) { return item.word === word && item.articleKey === articleKey; });
+// ==========================================
+// 单词复习卡（闪卡 · 简化版 SM-2）
+// ==========================================
+// 独立存储 gap_review_cards，按单词去重（一个词一张卡），
+// 与单词库 gap_wordbank（word+article 去重，同词可多条）互不干扰。
+function getReviewCards() {
+    try {
+        var data = localStorage.getItem("gap_review_cards");
+        return data ? JSON.parse(data) : {};
+    } catch(e) { return {}; }
+}
+function saveReviewCards(cards) {
+    try { localStorage.setItem("gap_review_cards", JSON.stringify(cards)); } catch(e) {}
+}
+function pad2(n) { return n < 10 ? "0" + n : "" + n; }
+function todayStr() {
+    var d = new Date();
+    return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate());
+}
+function addDays(dateStr, days) {
+    var d = new Date(dateStr + "T00:00:00");
+    d.setDate(d.getDate() + days);
+    return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate());
+}
+// 新词入库 → 自动建复习卡；已有卡片只刷新释义，不重置复习进度
+function upsertReviewCard(word, meaning, articleKey, articleTitle) {
+    var cards = getReviewCards();
+    var key = word.toLowerCase();
+    var t = todayStr();
+    if (cards[key]) {
+        if (meaning) cards[key].meaning = meaning;
+        if (!cards[key].source && articleKey) {
+            cards[key].source = { articleKey: articleKey, articleTitle: articleTitle };
+        }
+    } else {
+        cards[key] = {
+            word: key,
+            phonetic: PHONETIC[key] || "",
+            meaning: meaning || "",
+            ease: 2.0,        // SM-2 记忆系数
+            interval: 0,      // 当前间隔（天）
+            reps: 0,          // 连续答对次数
+            dueDate: t,       // 下次复习日期
+            lapses: 0,        // 累计忘记次数
+            status: "learning",
+            addedDate: t,
+            source: articleKey ? { articleKey: articleKey, articleTitle: articleTitle } : null
+        };
+    }
+    saveReviewCards(cards);
+}
+function removeReviewCard(word) {
+    var cards = getReviewCards();
+    delete cards[word.toLowerCase()];
+    saveReviewCards(cards);
+}
+// 今日待复习数量
+function getDueCount() {
+    var cards = getReviewCards();
+    var t = todayStr();
+    var n = 0;
+    for (var k in cards) { if (cards.hasOwnProperty(k) && cards[k].dueDate <= t) n++; }
+    return n;
+}
+// 今日复习队列（按加入时间排序，早加入的先复习）
+function getDueQueue() {
+    var cards = getReviewCards();
+    var t = todayStr();
+    var due = [];
+    for (var k in cards) {
+        if (cards.hasOwnProperty(k) && cards[k].dueDate <= t) due.push(cards[k]);
+    }
+    due.sort(function(a, b) { return (a.addedDate || "").localeCompare(b.addedDate || ""); });
+    return due;
+}
+// 明天预计待复习数
+function getTomorrowCount() {
+    var cards = getReviewCards();
+    var t = todayStr();
+    var tm = addDays(t, 1);
+    var n = 0;
+    for (var k in cards) {
+        if (cards.hasOwnProperty(k) && cards[k].dueDate > t && cards[k].dueDate <= tm) n++;
+    }
+    return n;
+}
+// 简化版 SM-2：三档自评更新记忆状态
+// rating: "good"(想起来了) / "hard"(模糊) / "again"(忘了)
+function rateReviewCard(word, rating, promote) {
+    var cards = getReviewCards();
+    var card = cards[word.toLowerCase()];
+    if (!card) return;
+    var t = todayStr();
+    if (rating === "good") {
+        if (card.interval === 0 && !promote) {
+            // 新词首次答对：本会话复现一次，先不推进间隔
+            card.status = "learning";
+        } else {
+            card.reps += 1;
+            if (card.interval === 0) card.interval = 1;
+            else if (card.interval === 1) card.interval = 3;
+            else if (card.interval === 3) card.interval = 7;
+            else card.interval = Math.round(card.interval * card.ease);
+            card.status = card.interval >= 7 ? "mastered" : "reviewing";
+        }
+        card.ease = Math.min(2.5, card.ease + 0.1);   // ease 增量 0.02 → 0.1
+        card.dueDate = addDays(t, card.interval);
+    } else if (rating === "hard") {
+        // 模糊：间隔减半（最少 1 天），不再假装"当天稍后再考"
+        card.ease = Math.max(1.3, card.ease - 0.08);
+        card.interval = Math.max(1, Math.round((card.interval || 1) / 2));
+        card.dueDate = addDays(t, card.interval);
+        card.status = card.interval >= 7 ? "reviewing" : "learning";
+    } else {
+        card.lapses += 1;
+        card.reps = 0;
+        card.interval = 1;
+        card.ease = Math.max(1.3, card.ease - 0.15);
+        card.dueDate = addDays(t, 1);
+        card.status = "learning";
+    }
+    saveReviewCards(cards);
 }
 
 // ==========================================
@@ -75,6 +205,7 @@ function menuAction(action) {
     document.getElementById("dropdown").classList.remove("show");
     if (action === "read") switchTab("read");
     else if (action === "wordbank") showTab("wordbank");
+    else if (action === "review") showTab("review");
 }
 
 function toggleShowEn() {
@@ -290,6 +421,7 @@ document.addEventListener("DOMContentLoaded", function() {
     initFont();
     initAccent();
     initDisplaySettings();
+    updateReviewBadge();
     showArticleList("science");
     // 页面隐藏/切后台/离开时停止朗读，防止退出文章后继续播放（机器音 bug 兜底）
     document.addEventListener("visibilitychange", function() {
@@ -306,8 +438,10 @@ document.addEventListener("DOMContentLoaded", function() {
 function showTab(tabName) {
     document.getElementById("read-panel").style.display = (tabName === "read") ? "block" : "none";
     document.getElementById("wordbank-panel").style.display = (tabName === "wordbank") ? "block" : "none";
+    document.getElementById("review-panel").style.display = (tabName === "review") ? "block" : "none";
     document.getElementById("topic-bar").style.display = (tabName === "read") ? "flex" : "none";
-    if (tabName === "wordbank") renderWordBank();
+    if (tabName === "wordbank") { renderWordBank(); updateReviewBadge(); }
+    if (tabName === "review") openReview();
 }
 
 function switchTab(tabName) {
@@ -740,6 +874,22 @@ function getBaseWord(word) {
     return lower;
 }
 
+// 提取查词弹窗里的中文释义（不含英文释义补充部分 .popup-english）
+function getPopupChineseMeaning() {
+    var popupEl = document.getElementById("popupMeaning");
+    if (!popupEl) return "";
+    var children = popupEl.children;
+    for (var i = 0; i < children.length; i++) {
+        var el = children[i];
+        // 中文释义是弹窗的直接子元素 <p>；英文释义包在 .popup-english 里，跳过
+        if (el.tagName === "P" && el.className.indexOf("popup-english") === -1) {
+            var t = el.textContent.trim();
+            if (t && t !== "翻译中...") return t;
+        }
+    }
+    return ""; // 无中文释义 → 不保存，避免英文释义入卡
+}
+
 async function lookupChinese(word) {
     var showEn = getSetting("showEn", true);
     var found = findInDict(word);
@@ -954,10 +1104,11 @@ function saveWord() {
     var article = articles[currentArticleKey];
     var title = article ? article.title : "未知文章";
     var base = getBaseWord(currentWord);  // 入库前还原成原型
-    addToWordBank(base, document.getElementById("popupMeaning").textContent, currentArticleKey, title);
+    addToWordBank(base, getPopupChineseMeaning(), currentArticleKey, title);
     var btn = document.getElementById("saveWordBtn");
     btn.textContent = "✓ 已在单词库中"; btn.className = "action-btn saved"; btn.onclick = removeSavedWord;
     if (currentWordElement) currentWordElement.classList.add("known");
+    updateReviewBadge();
 }
 
 function removeSavedWord() {
@@ -1578,5 +1729,287 @@ function ttsOnArticleLoad() {
     TTS.subChunks = []; TTS.subIndex = 0; TTS.cues = [];
     ttsClearHighlight();
     ttsUpdateUI();
+}
+
+// ==========================================
+// 单词复习（闪卡）
+// ==========================================
+var reviewSession = null;
+
+// 剔除释义里混入的英文释义长句（旧数据曾把英文释义一起存入），只保留中文部分
+function cleanMeaningForFlashcard(meaning) {
+    if (!meaning) return meaning;
+    var m = meaning.replace(/\s+/g, " ").trim();
+    // 找"连续英文单词"段（英文释义起点）；中文释义很少含 4+ 个连续英文单词
+    var match = /(?:[a-zA-Z]+\.?[ ,;:'"-]?){4,}[a-zA-Z]+/.exec(m);
+    if (!match) return m;
+    if (match.index > 0) return m.slice(0, match.index).trim();
+    return ""; // 整段都是英文释义 → 不显示
+}
+
+// ==========================================
+// 复习会话持久化：中途退出（切走/刷新）可恢复，不丢进度
+// ==========================================
+var REVIEW_SESSION_KEY = "gap_review_session";
+function saveReviewSession() {
+    if (!reviewSession) { clearReviewSession(); return; }
+    var snap = {
+        queue: reviewSession.queue.map(function(c) {
+            return {
+                word: c.word,
+                phonetic: c.phonetic,
+                meaning: c.meaning,
+                source: c.source,
+                sessionRetry: c.sessionRetry,
+                reviewedOnce: c.reviewedOnce
+            };
+        }),
+        stats: reviewSession.stats,
+        total: reviewSession.total
+    };
+    try { localStorage.setItem(REVIEW_SESSION_KEY, JSON.stringify(snap)); } catch(e) {}
+}
+function loadReviewSession() {
+    try { return JSON.parse(localStorage.getItem(REVIEW_SESSION_KEY)) || null; } catch(e) { return null; }
+}
+function clearReviewSession() {
+    try { localStorage.removeItem(REVIEW_SESSION_KEY); } catch(e) {}
+}
+
+// 从来源文章中提取含该词的原文句子，作为闪卡语境例句（R8）
+function getExampleSentence(card) {
+    if (!card || !card.source || !card.source.articleKey) return "";
+    var art = articles[card.source.articleKey];
+    if (!art || !art.text) return "";
+    var w = card.word;
+    var sents = splitSentences(art.text);
+    for (var i = 0; i < sents.length; i++) {
+        if (sents[i].toLowerCase().indexOf(w) !== -1) return sents[i].replace(/\s+/g, " ").trim();
+    }
+    return "";
+}
+
+// 刷新两处待复习角标：单词库入口按钮 + 菜单项
+function updateReviewBadge() {
+    var n = getDueCount();
+    var startBadge = document.getElementById("reviewStartBadge");
+    var menuBadge = document.getElementById("reviewMenuBadge");
+    if (startBadge) startBadge.textContent = n > 0 ? "今日 " + n + " 个" : "";
+    if (menuBadge) {
+        menuBadge.textContent = n > 0 ? String(n) : "";
+        menuBadge.style.display = n > 0 ? "inline-block" : "none";
+    }
+}
+
+function openReview() {
+    updateReviewBadge();
+    var body = document.getElementById("reviewBody");
+    var finish = document.getElementById("reviewFinish");
+    var empty = document.getElementById("reviewEmpty");
+    var resumeBanner = document.getElementById("reviewResumeBanner");
+
+    // 优先恢复上次未完成的复习会话（防中途退出丢失）
+    var saved = loadReviewSession();
+    var queue = null;
+    var resume = false;
+    if (saved && saved.queue && saved.queue.length > 0) {
+        var cards = getReviewCards();
+        queue = saved.queue.filter(function(c) { return cards[c.word]; });
+        if (queue.length > 0) {
+            var removed = saved.queue.length - queue.length;
+            reviewSession = {
+                queue: queue,
+                stats: saved.stats || { good: 0, hard: 0, again: 0 },
+                total: Math.max(queue.length, (saved.total || queue.length) - removed)
+            };
+            resume = true;
+        } else {
+            clearReviewSession();
+        }
+    }
+    if (!queue) queue = getDueQueue();
+
+    if (queue.length === 0) {
+        if (body) body.style.display = "none";
+        if (finish) finish.style.display = "none";
+        if (empty) empty.style.display = "block";
+        reviewSession = null;
+        clearReviewSession();
+        if (resumeBanner) resumeBanner.style.display = "none";
+        return;
+    }
+    if (!reviewSession) reviewSession = { queue: queue, stats: { good: 0, hard: 0, again: 0 }, total: queue.length };
+    if (empty) empty.style.display = "none";
+    if (finish) finish.style.display = "none";
+    if (body) body.style.display = "block";
+    if (resumeBanner) resumeBanner.style.display = resume ? "block" : "none";
+    renderNextCard();
+}
+
+function renderNextCard() {
+    if (!reviewSession) return;
+    var q = reviewSession.queue;
+    if (q.length === 0) { renderReviewFinish(); return; }
+    reviewSession.current = q[0];
+    reviewSession.locked = false;
+    resetReviewRateBtns();
+    updateReviewProgress();
+    var card = reviewSession.current;
+    var cardEl = document.getElementById("flashCard");
+    cardEl.classList.remove("flipped");
+    document.getElementById("cardWord").textContent = card.word;
+    document.getElementById("cardPhonetic").textContent = card.phonetic ? "/" + card.phonetic + "/" : "";
+    document.getElementById("cardWordBack").textContent = card.word;
+    document.getElementById("cardMeaning").textContent = cleanMeaningForFlashcard(card.meaning) || "暂无释义";
+    var srcBtn = document.getElementById("cardSourceBtn");
+    srcBtn.style.display = (card.source && card.source.articleKey) ? "" : "none";
+    // R3：不再自动朗读（避免先给答案，保留主动回忆）；发音由用户点按钮触发
+    // R8：显示来源文章中的原句例句，提供语境
+    var ex = document.getElementById("cardExample");
+    if (ex) {
+        var sent = getExampleSentence(card);
+        ex.textContent = sent;
+        ex.style.display = sent ? "block" : "none";
+    }
+    // R10：重考 / 复现确认标识
+    var label = document.getElementById("reviewRetryLabel");
+    if (label) {
+        if (card.reviewedOnce) {
+            label.textContent = "🔁 复现确认：再答对一次就记住啦";
+            label.style.display = "";
+        } else if (card.sessionRetry > 0) {
+            label.textContent = "第 " + (card.sessionRetry + 1) + " 次机会";
+            label.style.display = "";
+        } else {
+            label.style.display = "none";
+        }
+    }
+}
+
+function flipCard() {
+    // 评分后展示释义的锁定期间，点击卡片不干扰"下一个"流程
+    if (reviewSession && reviewSession.locked) return;
+    document.getElementById("flashCard").classList.toggle("flipped");
+}
+
+function playCardAudio() {
+    var card = reviewSession ? reviewSession.current : null;
+    if (card) playPronunciation(card.word);
+}
+
+// 完成一张卡时累加会话统计（按卡最终结果计，重考不重复计数 → R7）
+function countReviewResult(r) {
+    if (!reviewSession) return;
+    if (r === "good") reviewSession.stats.good++;
+    else if (r === "hard") reviewSession.stats.hard++;
+    else reviewSession.stats.again++;
+}
+
+function rateCard(rating) {
+    if (!reviewSession || !reviewSession.current || reviewSession.locked) return;
+    var card = reviewSession.current;
+    reviewSession.locked = true;
+    reviewSession.queue.shift();
+
+    // R6 新词学习阶段：首次答对先不算掌握，本会话复现一次后再推进间隔
+    var isLearningPass = (rating === "good" && card.interval === 0 && !card.reviewedOnce);
+    if (isLearningPass) {
+        card.reviewedOnce = true;
+        rateReviewCard(card.word, rating, false);   // 不推进间隔
+        reviewSession.queue.push(card);
+    } else if (rating === "good") {
+        rateReviewCard(card.word, rating, true);
+        countReviewResult("good");
+    } else {
+        // 模糊/忘了 → 本轮重考最多 2 次
+        card.sessionRetry = (card.sessionRetry || 0) + 1;
+        rateReviewCard(card.word, rating);
+        if (card.sessionRetry < 2) {
+            reviewSession.queue.push(card);
+        } else {
+            countReviewResult(rating);  // 重考用尽，按最终结果计；间隔已由 rateReviewCard 安排好
+        }
+    }
+
+    // 卡片保持背面显示释义；禁用评分按钮，显示"下一个"按钮
+    document.getElementById("flashCard").classList.add("flipped");
+    setRateButtonsEnabled(false);
+    var nextBtn = document.getElementById("reviewNextBtn");
+    if (nextBtn) nextBtn.style.display = "";
+    saveReviewSession();   // 评分后持久化会话，中途退出可恢复
+}
+
+// 用户看完释义，点"下一个"进入下一张
+function reviewNextCard() {
+    if (!reviewSession) return;
+    reviewSession.locked = false;
+    resetReviewRateBtns();
+    renderNextCard();
+}
+
+// 复位评分按钮：隐藏"下一个"，恢复三个评分按钮为可点、可见
+function resetReviewRateBtns() {
+    var nextBtn = document.getElementById("reviewNextBtn");
+    if (nextBtn) nextBtn.style.display = "none";
+    setRateButtonsEnabled(true);
+}
+// 评分按钮状态：true=可点可见（正面）；false=淡出消失（评分后，防止误点）
+function setRateButtonsEnabled(enabled) {
+    var rateBtns = document.querySelectorAll(".review-rate-btn:not(#reviewNextBtn)");
+    for (var i = 0; i < rateBtns.length; i++) {
+        rateBtns[i].disabled = !enabled;
+        rateBtns[i].classList.toggle("rating-fade", !enabled);
+        rateBtns[i].style.opacity = "";
+        rateBtns[i].style.display = "";
+    }
+}
+
+function updateReviewProgress() {
+    var done = reviewSession.total - reviewSession.queue.length;
+    var el = document.getElementById("reviewProgress");
+    if (el) el.textContent = "进度 " + done + "/" + reviewSession.total;
+    var bar = document.getElementById("reviewProgressBar");
+    if (bar) {
+        var pct = reviewSession.total ? Math.round(done / reviewSession.total * 100) : 0;
+        bar.style.width = pct + "%";
+    }
+}
+
+function renderReviewFinish() {
+    var body = document.getElementById("reviewBody");
+    var finish = document.getElementById("reviewFinish");
+    if (body) body.style.display = "none";
+    if (!finish) return;
+    var s = reviewSession.stats;
+    document.getElementById("finishTotal").textContent = reviewSession.total + " 个";
+    document.getElementById("finishGood").textContent = s.good + " 个";
+    document.getElementById("finishHard").textContent = s.hard + " 个";
+    document.getElementById("finishAgain").textContent = s.again + " 个";
+    document.getElementById("finishRate").textContent = reviewSession.total ? Math.round(s.good / reviewSession.total * 100) + "%" : "—";
+    document.getElementById("finishTomorrow").textContent = "明天预计 " + getTomorrowCount() + " 个待复习";
+    finish.style.display = "block";
+    reviewSession = null;
+    clearReviewSession();   // 完成即清理持久化会话
+    updateReviewBadge();
+}
+
+// 闪卡"回原文"：跳转到来源文章并滚动高亮该词
+function reviewOpenSource() {
+    var card = reviewSession ? reviewSession.current : null;
+    if (!card || !card.source || !card.source.articleKey) return;
+    var key = card.source.articleKey;
+    showTab("read");
+    openArticle(key);
+    setTimeout(function() {
+        var els = document.querySelectorAll("#articleContent .word");
+        for (var i = 0; i < els.length; i++) {
+            if (els[i].textContent.toLowerCase() === card.word) {
+                els[i].classList.add("sentence-highlight");
+                els[i].scrollIntoView({ behavior: "smooth", block: "center" });
+                setTimeout(function() { els[i].classList.remove("sentence-highlight"); }, 4000);
+                break;
+            }
+        }
+    }, 300);
 }
 
