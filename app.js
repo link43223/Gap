@@ -92,6 +92,84 @@ function addDays(dateStr, days) {
     d.setDate(d.getDate() + days);
     return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate());
 }
+function normalizeReviewCard(card, key) {
+    var t = todayStr();
+    card = card || {};
+    var word = (card.word || key || "").toLowerCase();
+    var interval = parseInt(card.interval, 10);
+    if (isNaN(interval) || interval < 0) interval = 0;
+    var ease = parseFloat(card.ease);
+    if (isNaN(ease) || ease < 1.3) ease = 2.3;
+    card.word = word;
+    card.phonetic = card.phonetic || PHONETIC[word] || "";
+    card.meaning = card.meaning || "";
+    card.ease = ease;
+    card.interval = interval;
+    card.reps = Math.max(0, parseInt(card.reps, 10) || 0);
+    card.lapses = Math.max(0, parseInt(card.lapses, 10) || 0);
+    card.dueDate = card.dueDate || t;
+    card.addedDate = card.addedDate || t;
+    card.lastReviewedDate = card.lastReviewedDate || "";
+    card.status = card.status || (interval === 0 ? "new" : (interval >= 30 ? "mastered" : "reviewing"));
+    // 注意：不要把 {status:"learning", interval:0} 强制改回 "new" ——
+    // rateReviewCard 在学习期复现时会合法地设置该状态，改回会清零学习进度。
+    if (interval >= 30) card.status = "mastered";
+    else if (interval > 0 && card.status === "mastered") card.status = "reviewing";
+    if (card.source && !card.source.articleTitle) card.source.articleTitle = "";
+    return card;
+}
+function migrateReviewCards() {
+    var cards = getReviewCards();
+    var changed = false;
+    var merged = {};
+    for (var key in cards) {
+        if (!cards.hasOwnProperty(key)) continue;
+        var normalized = normalizeReviewCard(cards[key], key);
+        var w = normalized.word;
+        if (!w) continue;
+        if (merged[w]) {
+            // key 大小写不统一（如 "Hello" 与 "hello"）→ 合并：保留进度更靠后的卡，补齐缺字段，避免静默覆盖丢数据
+            var ex = merged[w];
+            if (normalized.interval > ex.interval ||
+                (normalized.interval === ex.interval && normalized.reps > ex.reps) ||
+                (normalized.interval === ex.interval && normalized.reps === ex.reps &&
+                 (normalized.lastReviewedDate || "") > (ex.lastReviewedDate || ""))) {
+                if (!normalized.meaning && ex.meaning) normalized.meaning = ex.meaning;
+                if (!normalized.source && ex.source) normalized.source = ex.source;
+                merged[w] = normalized;
+            } else {
+                if (!ex.meaning && normalized.meaning) ex.meaning = normalized.meaning;
+                if (!ex.source && normalized.source) ex.source = normalized.source;
+            }
+            changed = true;
+        } else {
+            merged[w] = normalized;
+            changed = true;
+        }
+    }
+    cards = merged;
+    getWordBank().forEach(function(item) {
+        var word = getBaseWord(item.word || "");
+        if (!word) return;
+        if (!cards[word]) {
+            cards[word] = normalizeReviewCard({
+                word: word,
+                meaning: item.meaning || "",
+                addedDate: item.time ? String(item.time).slice(0, 10) : todayStr(),
+                dueDate: todayStr(),
+                source: item.articleKey ? { articleKey: item.articleKey, articleTitle: item.articleTitle || "" } : null
+            }, word);
+            changed = true;
+        } else {
+            if (!cards[word].meaning && item.meaning) { cards[word].meaning = item.meaning; changed = true; }
+            if (!cards[word].source && item.articleKey) {
+                cards[word].source = { articleKey: item.articleKey, articleTitle: item.articleTitle || "" };
+                changed = true;
+            }
+        }
+    });
+    if (changed) saveReviewCards(cards);
+}
 // 新词入库 → 自动建复习卡；已有卡片只刷新释义，不重置复习进度
 function upsertReviewCard(word, meaning, articleKey, articleTitle) {
     var cards = getReviewCards();
@@ -117,6 +195,7 @@ function upsertReviewCard(word, meaning, articleKey, articleTitle) {
             source: articleKey ? { articleKey: articleKey, articleTitle: articleTitle } : null
         };
     }
+    if (cards[key]) cards[key] = normalizeReviewCard(cards[key], key);
     saveReviewCards(cards);
 }
 function removeReviewCard(word) {
@@ -138,9 +217,22 @@ function getDueQueue() {
     var t = todayStr();
     var due = [];
     for (var k in cards) {
-        if (cards.hasOwnProperty(k) && cards[k].dueDate <= t) due.push(cards[k]);
+        if (cards.hasOwnProperty(k) && cards[k].dueDate <= t) {
+            var card = normalizeReviewCard(cards[k], k);
+            card.sessionRetry = 0;
+            card.reviewedOnce = false;
+            due.push(card);
+        }
     }
-    due.sort(function(a, b) { return (a.addedDate || "").localeCompare(b.addedDate || ""); });
+    due.sort(function(a, b) {
+        var priority = { "new": 0, "learning": 1, "reviewing": 2, "mastered": 3 };
+        var pa = priority[a.status] !== undefined ? priority[a.status] : 2;
+        var pb = priority[b.status] !== undefined ? priority[b.status] : 2;
+        if (pa !== pb) return pa - pb;
+        if ((a.dueDate || "") !== (b.dueDate || "")) return (a.dueDate || "").localeCompare(b.dueDate || "");
+        if ((b.lapses || 0) !== (a.lapses || 0)) return (b.lapses || 0) - (a.lapses || 0);
+        return (a.addedDate || "").localeCompare(b.addedDate || "");
+    });
     return due;
 }
 // 明天预计待复习数
@@ -158,25 +250,27 @@ function getTomorrowCount() {
 // rating: "good"(想起来了) / "hard"(模糊) / "again"(忘了)
 function rateReviewCard(word, rating, promote) {
     var cards = getReviewCards();
-    var card = cards[word.toLowerCase()];
-    if (!card) return;
+    var key = word.toLowerCase();
+    if (!cards[key]) return;
+    var card = normalizeReviewCard(cards[key], key);
     var t = todayStr();
     if (rating === "good") {
         if (card.interval === 0 && !promote) {
-            // 新词首次答对：本会话复现一次，先不推进间隔
             card.status = "learning";
+            card.dueDate = t;
         } else {
             card.reps += 1;
             if (card.interval === 0) card.interval = 1;
             else if (card.interval === 1) card.interval = 3;
             else if (card.interval === 3) card.interval = 7;
-            else card.interval = Math.round(card.interval * card.ease);
-            card.status = card.interval >= 7 ? "mastered" : "reviewing";
+            else if (card.interval === 7) card.interval = 14;
+            else if (card.interval === 14) card.interval = 30;
+            else card.interval = Math.max(30, Math.round(card.interval * card.ease));
+            card.status = card.interval >= 30 ? "mastered" : "reviewing";
+            card.dueDate = addDays(t, card.interval);
         }
-        card.ease = Math.min(2.5, card.ease + 0.1);   // ease 增量 0.02 → 0.1
-        card.dueDate = addDays(t, card.interval);
+        card.ease = Math.min(2.8, card.ease + 0.08);
     } else if (rating === "hard") {
-        // 模糊：间隔减半（最少 1 天），不再假装"当天稍后再考"
         card.ease = Math.max(1.3, card.ease - 0.08);
         card.interval = Math.max(1, Math.round((card.interval || 1) / 2));
         card.dueDate = addDays(t, card.interval);
@@ -189,7 +283,10 @@ function rateReviewCard(word, rating, promote) {
         card.dueDate = addDays(t, 1);
         card.status = "learning";
     }
+    card.lastReviewedDate = t;
+    cards[key] = card;
     saveReviewCards(cards);
+    return card;
 }
 
 // ==========================================
@@ -421,6 +518,7 @@ document.addEventListener("DOMContentLoaded", function() {
     initFont();
     initAccent();
     initDisplaySettings();
+    migrateReviewCards();
     updateReviewBadge();
     showArticleList("science");
     // 页面隐藏/切后台/离开时停止朗读，防止退出文章后继续播放（机器音 bug 兜底）
@@ -1760,11 +1858,16 @@ function saveReviewSession() {
                 phonetic: c.phonetic,
                 meaning: c.meaning,
                 source: c.source,
+                status: c.status,
+                interval: c.interval,
+                lapses: c.lapses,
+                addedDate: c.addedDate,
                 sessionRetry: c.sessionRetry,
                 reviewedOnce: c.reviewedOnce
             };
         }),
         stats: reviewSession.stats,
+        againWords: reviewSession.againWords || [],
         total: reviewSession.total
     };
     try { localStorage.setItem(REVIEW_SESSION_KEY, JSON.stringify(snap)); } catch(e) {}
@@ -1814,15 +1917,30 @@ function openReview() {
     var resume = false;
     if (saved && saved.queue && saved.queue.length > 0) {
         var cards = getReviewCards();
-        queue = saved.queue.filter(function(c) { return cards[c.word]; });
-        if (queue.length > 0) {
-            var removed = saved.queue.length - queue.length;
-            reviewSession = {
-                queue: queue,
-                stats: saved.stats || { good: 0, hard: 0, again: 0 },
-                total: Math.max(queue.length, (saved.total || queue.length) - removed)
-            };
-            resume = true;
+        var savedQueue = saved.queue.filter(function(c) { return cards[c.word]; })
+            .map(function(c) {
+                var latest = normalizeReviewCard(cards[c.word], c.word);
+                for (var p in c) latest[p] = c[p];
+                return latest;
+            });
+        if (savedQueue.length > 0) {
+            var shouldResume = true;
+            if (typeof window.confirm === "function") {
+                shouldResume = window.confirm("发现上次未完成的复习。点“确定”继续，点“取消”重新开始今日复习。");
+            }
+            if (shouldResume) {
+                var removed = saved.queue.length - savedQueue.length;
+                queue = savedQueue;
+                reviewSession = {
+                    queue: queue,
+                    stats: saved.stats || { good: 0, hard: 0, again: 0 },
+                    againWords: saved.againWords || [],
+                    total: Math.max(queue.length, (saved.total || queue.length) - removed)
+                };
+                resume = true;
+            } else {
+                clearReviewSession();
+            }
         } else {
             clearReviewSession();
         }
@@ -1838,7 +1956,7 @@ function openReview() {
         if (resumeBanner) resumeBanner.style.display = "none";
         return;
     }
-    if (!reviewSession) reviewSession = { queue: queue, stats: { good: 0, hard: 0, again: 0 }, total: queue.length };
+    if (!reviewSession) reviewSession = { queue: queue, stats: { good: 0, hard: 0, again: 0 }, againWords: [], total: queue.length };
     if (empty) empty.style.display = "none";
     if (finish) finish.style.display = "none";
     if (body) body.style.display = "block";
@@ -1902,7 +2020,13 @@ function countReviewResult(r) {
     if (!reviewSession) return;
     if (r === "good") reviewSession.stats.good++;
     else if (r === "hard") reviewSession.stats.hard++;
-    else reviewSession.stats.again++;
+    else {
+        reviewSession.stats.again++;
+        if (!reviewSession.againWords) reviewSession.againWords = [];
+        if (reviewSession.againWords.indexOf(reviewSession.current.word) === -1) {
+            reviewSession.againWords.push(reviewSession.current.word);
+        }
+    }
 }
 
 function rateCard(rating) {
@@ -1915,15 +2039,27 @@ function rateCard(rating) {
     var isLearningPass = (rating === "good" && card.interval === 0 && !card.reviewedOnce);
     if (isLearningPass) {
         card.reviewedOnce = true;
-        rateReviewCard(card.word, rating, false);   // 不推进间隔
+        var learningCard = rateReviewCard(card.word, rating, false);   // 不推进间隔
+        if (learningCard) {
+            card.status = learningCard.status;
+            card.dueDate = learningCard.dueDate;
+            card.ease = learningCard.ease;
+        }
         reviewSession.queue.push(card);
     } else if (rating === "good") {
         rateReviewCard(card.word, rating, true);
         countReviewResult("good");
     } else {
-        // 模糊/忘了 → 本轮重考最多 2 次
+        // 模糊/忘了 → 每卡本轮最多 2 次答题机会（含初始那次），重考用尽后按最终结果计数
         card.sessionRetry = (card.sessionRetry || 0) + 1;
-        rateReviewCard(card.word, rating);
+        var updatedCard = rateReviewCard(card.word, rating);
+        if (updatedCard) {
+            card.status = updatedCard.status;
+            card.interval = updatedCard.interval;
+            card.dueDate = updatedCard.dueDate;
+            card.ease = updatedCard.ease;
+            card.lapses = updatedCard.lapses;
+        }
         if (card.sessionRetry < 2) {
             reviewSession.queue.push(card);
         } else {
@@ -1965,7 +2101,8 @@ function setRateButtonsEnabled(enabled) {
 }
 
 function updateReviewProgress() {
-    var done = reviewSession.total - reviewSession.queue.length;
+    var done = reviewSession.stats.good + reviewSession.stats.hard + reviewSession.stats.again;
+    done = Math.min(done, reviewSession.total);
     var el = document.getElementById("reviewProgress");
     if (el) el.textContent = "进度 " + done + "/" + reviewSession.total;
     var bar = document.getElementById("reviewProgressBar");
@@ -1981,16 +2118,49 @@ function renderReviewFinish() {
     if (body) body.style.display = "none";
     if (!finish) return;
     var s = reviewSession.stats;
+    var againWords = (reviewSession.againWords || []).slice();
     document.getElementById("finishTotal").textContent = reviewSession.total + " 个";
     document.getElementById("finishGood").textContent = s.good + " 个";
     document.getElementById("finishHard").textContent = s.hard + " 个";
     document.getElementById("finishAgain").textContent = s.again + " 个";
     document.getElementById("finishRate").textContent = reviewSession.total ? Math.round(s.good / reviewSession.total * 100) + "%" : "—";
-    document.getElementById("finishTomorrow").textContent = "明天预计 " + getTomorrowCount() + " 个待复习";
+    document.getElementById("finishTomorrow").textContent = "明天预计 " + getTomorrowCount() + " 个待复习" +
+        (againWords.length ? "，其中 " + againWords.length + " 个需要重点回看" : "");
+    var actions = finish.querySelector(".review-result-actions");
+    if (actions) {
+        var oldAgainBtn = document.getElementById("reviewAgainWordsBtn");
+        if (oldAgainBtn) oldAgainBtn.remove();
+        if (againWords.length) {
+            var againBtn = document.createElement("button");
+            againBtn.id = "reviewAgainWordsBtn";
+            againBtn.className = "action-btn";
+            againBtn.textContent = "复习忘记词";
+            againBtn.onclick = function() { reviewAgainWords(againWords); };
+            actions.appendChild(againBtn);
+        }
+    }
     finish.style.display = "block";
     reviewSession = null;
     clearReviewSession();   // 完成即清理持久化会话
     updateReviewBadge();
+}
+
+function reviewAgainWords(words) {
+    var cards = getReviewCards();
+    var queue = [];
+    words.forEach(function(word) {
+        if (cards[word]) {
+            var card = normalizeReviewCard(cards[word], word);
+            card.sessionRetry = 0;
+            card.reviewedOnce = true;
+            queue.push(card);
+        }
+    });
+    if (!queue.length) return;
+    reviewSession = { queue: queue, stats: { good: 0, hard: 0, again: 0 }, againWords: [], total: queue.length };
+    document.getElementById("reviewFinish").style.display = "none";
+    document.getElementById("reviewBody").style.display = "block";
+    renderNextCard();
 }
 
 // 闪卡"回原文"：跳转到来源文章并滚动高亮该词
@@ -2002,14 +2172,17 @@ function reviewOpenSource() {
     openArticle(key);
     setTimeout(function() {
         var els = document.querySelectorAll("#articleContent .word");
+        var targetBase = getBaseWord(card.word);
         for (var i = 0; i < els.length; i++) {
-            if (els[i].textContent.toLowerCase() === card.word) {
-                els[i].classList.add("sentence-highlight");
-                els[i].scrollIntoView({ behavior: "smooth", block: "center" });
-                setTimeout(function() { els[i].classList.remove("sentence-highlight"); }, 4000);
+            if (getBaseWord(els[i].textContent) === targetBase) {
+                var target = els[i].closest(".sentence") || els[i];
+                target.classList.add("sentence-highlight");
+                target.scrollIntoView({ behavior: "smooth", block: "center" });
+                setTimeout(function() { target.classList.remove("sentence-highlight"); }, 4000);
                 break;
             }
         }
     }, 300);
 }
+
 
