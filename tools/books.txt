@@ -1,0 +1,13 @@
+# Gap 公版书单（Standard Ebooks）
+# 每行一本：Standard Ebooks 的书籍页面 URL
+# 导入：node tools/import.js          （导入全部）
+#        node tools/import.js --book <slug>   （只导入单本，slug 为 URL 末尾书名）
+#
+# 说明：所有书均为公有领域（CC0），可自由再分发。
+# 反爬提示：不要直接脚本抓取官网 epub 下载链接（会封 IP 24h），本脚本从官方 GitHub 源仓库获取。
+https://standardebooks.org/ebooks/robert-louis-stevenson/the-strange-case-of-dr-jekyll-and-mr-hyde
+https://standardebooks.org/ebooks/jane-austen/pride-and-prejudice
+https://standardebooks.org/ebooks/charlotte-bronte/jane-eyre
+https://standardebooks.org/ebooks/alexandre-dumas/the-count-of-monte-cristo
+https://standardebooks.org/ebooks/emily-bronte/wuthering-heights
+https://standardebooks.org/ebooks/h-g-wells/the-time-machine

@@ -1,5 +1,5 @@
 // Gap Service Worker - 离线缓存
-var CACHE = "gap-v26";
+var CACHE = "gap-v29";
 var FILES = [
     "/",
     "/index.html",
@@ -18,6 +18,8 @@ self.addEventListener("install", function(e) {
             return cache.addAll(FILES);
         })
     );
+    // 新版本立即接管，避免旧缓存继续服务（配合 activate 的 clients.claim）
+    self.skipWaiting();
 });
 
 // 激活时清理旧缓存
@@ -28,11 +30,13 @@ self.addEventListener("activate", function(e) {
                 keys.filter(function(k) { return k !== CACHE; })
                     .map(function(k) { return caches.delete(k); })
             );
+        }).then(function() {
+            return self.clients.claim();
         })
     );
 });
 
-// 请求拦截：缓存优先，网络兜底
+// 请求拦截
 self.addEventListener("fetch", function(e) {
     // API 请求走网络
     if (e.request.url.indexOf("api.dictionaryapi.dev") !== -1 ||
@@ -40,6 +44,44 @@ self.addEventListener("fetch", function(e) {
         return;
     }
 
+    // 页面导航（HTML）：网络优先，离线才回退缓存 —— 保证用户总是拿到最新版本，
+    // 避免 cache-first 导致 index.html 永远命中旧缓存（"版本古老"问题根因）
+    if (e.request.mode === "navigate") {
+        e.respondWith(
+            fetch(e.request).then(function(response) {
+                if (response.ok) {
+                    var clone = response.clone();
+                    caches.open(CACHE).then(function(cache) {
+                        cache.put(e.request, clone);
+                    });
+                }
+                return response;
+            }).catch(function() {
+                return caches.match(e.request);
+            })
+        );
+        return;
+    }
+
+    // se-books 数据（catalog / data.js）：Stale-While-Revalidate —— 先返回缓存（快 + 离线可用），
+    // 后台拉取新版本更新缓存，保证重新导入后数据能自动刷新
+    if (e.request.url.indexOf("/se-books/") !== -1) {
+        e.respondWith(
+            caches.match(e.request).then(function(cached) {
+                var network = fetch(e.request).then(function(response) {
+                    if (response.ok) {
+                        var clone = response.clone();
+                        caches.open(CACHE).then(function(cache) { cache.put(e.request, clone); });
+                    }
+                    return response;
+                }).catch(function() { return cached; });
+                return cached || network;
+            })
+        );
+        return;
+    }
+
+    // 静态资源（带版本 query，URL 变化即重新缓存）：缓存优先，网络兜底
     e.respondWith(
         caches.match(e.request).then(function(cached) {
             return cached || fetch(e.request).then(function(response) {

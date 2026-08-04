@@ -10,7 +10,7 @@
     <meta name="theme-color" content="#f5f5f7">
     <link rel="manifest" href="/manifest.json">
     <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500&family=Inter:wght@400&family=Libre+Baskerville&family=Lora:wght@500&family=Merriweather:wght@400&family=Nunito:wght@400&family=Open+Sans&family=Poppins:wght@400&family=Raleway:wght@400&family=Rubik:wght@400&family=Space+Mono&family=Spectral:wght@400&family=Ubuntu:wght@400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=26">
+    <link rel="stylesheet" href="style.css?v=31">
 </head>
 <body>
 <div class="container">
@@ -114,6 +114,7 @@
 
     <div id="topic-bar">
         <span class="topic-label">话题</span>
+        <button class="topic-btn" id="libraryTabBtn" onclick="selectLibrary()">📚 图书馆</button>
         <button class="topic-btn" onclick="selectTopic('daily')">⭐ 每日精选</button>
         <button class="topic-btn active" onclick="selectTopic('science')">科学科技</button>
         <button class="topic-btn" onclick="selectTopic('health')">健康</button>
@@ -237,6 +238,30 @@
         </div>
     </div>
 
+    <!-- 图书馆面板：书架 + 书内章节 -->
+    <div id="library-panel" class="panel" style="display:none;">
+        <div id="shelfView">
+            <div class="library-header">
+                <h2 style="font-size:18px;margin:0;">图书馆</h2>
+                <span class="library-sub">Standard Ebooks 公版书 · 按需加载</span>
+            </div>
+            <div id="shelfList" class="shelf-list"></div>
+        </div>
+        <div id="bookChaptersView" style="display:none;">
+            <button class="back-btn" onclick="backToShelf()">← 返回书架</button>
+            <div class="book-hero">
+                <img id="bookHeroCover" class="book-hero-cover" alt="">
+                <div class="book-hero-info">
+                    <h2 id="bookHeroTitle"></h2>
+                    <p id="bookHeroTitleCn" class="book-title-cn"></p>
+                    <p id="bookHeroMeta" class="book-meta"></p>
+                    <p id="bookHeroDesc" class="book-desc"></p>
+                </div>
+            </div>
+            <div id="bookChapterList" class="chapter-list"></div>
+        </div>
+    </div>
+
         <div id="wordPopup" class="word-popup">
         <div class="popup-header"><strong id="popupWord"></strong><button class="icon-btn close-btn" onclick="closePopup()">×</button></div>
         <div id="popupMeaning"></div>
@@ -262,6 +287,6 @@
 <script src="articles.js"></script>
 <script src="dict-zh.js"></script>
 <script src="phonetic.js"></script>
-<script src="app.js?v=29"></script>
+<script src="app.js?v=38"></script>
 </body>
 </html>

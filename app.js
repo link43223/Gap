@@ -19,11 +19,18 @@ function setSetting(key, value) {
 // ==========================================
 var currentTopic = "science";
 var currentArticleKey = "science";
+// 图书馆（Standard Ebooks 公版书）
+var SE_CATALOG = [];        // se-catalog.json 的书目索引
+var SE_LOADED = {};         // 已加载 data.js 的 slug → 章节对象
+var libraryNav = { book: null };  // 当前书内阅读的返回上下文
 var currentWord = "";
 var currentWordElement = null;
 var currentDictData = null;
 var currentPhonetic = "";
 var audioCache = {};
+// 阅读进度记忆（段落级）：localStorage 格式 { chapterId, paragraphIndex, percent, updatedAt }
+var PROGRESS_PREFIX = "gap-progress:";
+var readProgress = { para: 0, percent: 0, timer: null, observer: null, savedPara: -1, savedAt: 0 };
 
 // ==========================================
 // 单词库
@@ -537,7 +544,9 @@ function showTab(tabName) {
     document.getElementById("read-panel").style.display = (tabName === "read") ? "block" : "none";
     document.getElementById("wordbank-panel").style.display = (tabName === "wordbank") ? "block" : "none";
     document.getElementById("review-panel").style.display = (tabName === "review") ? "block" : "none";
-    document.getElementById("topic-bar").style.display = (tabName === "read") ? "flex" : "none";
+    var libPanel = document.getElementById("library-panel");
+    if (libPanel) libPanel.style.display = (tabName === "library") ? "block" : "none";
+    document.getElementById("topic-bar").style.display = (tabName === "read" || tabName === "library") ? "flex" : "none";
     if (tabName === "wordbank") { renderWordBank(); updateReviewBadge(); }
     if (tabName === "review") openReview();
 }
@@ -561,6 +570,176 @@ function selectTopic(topic) {
     closePopup();
 }
 
+// ==========================================
+// 图书馆（Standard Ebooks 公版书）
+// ==========================================
+function hideLibraryPanel() {
+    var p = document.getElementById("library-panel");
+    if (p) p.style.display = "none";
+}
+
+// 进入图书馆 Tab（书架）
+function selectLibrary() {
+    document.querySelectorAll(".topic-btn").forEach(function(btn) { btn.classList.remove("active"); });
+    var tabBtn = document.getElementById("libraryTabBtn");
+    if (tabBtn) tabBtn.classList.add("active");
+    showTab("library");
+    // 重新进入时回到书架视图
+    document.getElementById("bookChaptersView").style.display = "none";
+    document.getElementById("shelfView").style.display = "block";
+    if (!SE_CATALOG.length) loadCatalog();
+    else renderShelf();
+    closePopup();
+}
+
+// 加载书目录索引 se-catalog.json
+function loadCatalog() {
+    var listDiv = document.getElementById("shelfList");
+    listDiv.innerHTML = '<div class="empty-hint" style="padding:48px 0;text-align:center;color:#aeaeb2;">正在加载书架…</div>';
+    fetch("se-books/se-catalog.json")
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            SE_CATALOG = data.books || [];
+            renderShelf();
+        })
+        .catch(function() {
+            listDiv.innerHTML = '<div class="empty-hint" style="padding:48px 0;text-align:center;color:#aeaeb2;">书架加载失败，请检查网络后重试</div>';
+        });
+}
+
+function formatNum(n) { return (n || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
+function escHtml(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+// 章节标题：纯罗马数字（如 "I"/"LXI"，《傲慢与偏见》类无文本标题的书）加 "Chapter " 前缀，增强书卷感；其余原样返回
+function formatChapterTitle(title) {
+    var t = String(title || "").trim();
+    if (/^[IVXLC]+$/i.test(t)) return "Chapter " + t.toUpperCase();
+    return title;
+}
+
+// 渲染书架
+function renderShelf() {
+    var listDiv = document.getElementById("shelfList");
+    if (!SE_CATALOG.length) {
+        listDiv.innerHTML = '<div class="empty-hint" style="padding:48px 0;text-align:center;color:#aeaeb2;">书架还是空的，用 tools/import.js 导入公版书吧</div>';
+        return;
+    }
+    listDiv.innerHTML = SE_CATALOG.map(function(b) {
+        var meta = [b.author, b.originalYear || b.year, b.chapters + " 章", formatNum(b.wordCount) + " 词"].filter(Boolean).join(" · ");
+        return '<div class="book-card" onclick="openLibraryBook(\'' + b.slug + '\')">' +
+            '<img class="book-cover" src="' + b.cover + '" alt="" loading="lazy">' +
+            '<div class="book-info">' +
+                '<div class="book-title-row"><span class="book-title">' + escHtml(b.title) + '</span></div>' +
+                (b.titleCn ? '<div class="book-title-cn">' + escHtml(b.titleCn) + '</div>' : '') +
+                '<div class="book-meta">' + escHtml(meta) + '</div>' +
+                (b.description ? '<div class="book-desc">' + escHtml(b.description) + '</div>' : '') +
+            '</div>' +
+        '</div>';
+    }).join("");
+}
+
+// 打开一本书：按需加载 data.js 并渲染章节列表
+function openLibraryBook(slug) {
+    libraryNav.book = slug;
+    document.getElementById("shelfView").style.display = "none";
+    document.getElementById("bookChaptersView").style.display = "block";
+    var listDiv = document.getElementById("bookChapterList");
+    listDiv.innerHTML = '<div class="empty-hint" style="padding:48px 0;text-align:center;color:#aeaeb2;">正在加载章节…</div>';
+    loadBookData(slug).then(function() {
+        var meta = window.SE_BOOKS[slug].meta;
+        document.getElementById("bookHeroTitle").textContent = meta.title;
+        document.getElementById("bookHeroTitleCn").textContent = meta.titleCn || "";
+        document.getElementById("bookHeroMeta").textContent = [meta.author, (meta.originalYear || meta.year), meta.chapters + " 章", formatNum(meta.wordCount) + " 词"].filter(Boolean).join(" · ");
+        document.getElementById("bookHeroDesc").textContent = meta.description || "";
+        var coverEl = document.getElementById("bookHeroCover");
+        if (meta.cover) { coverEl.src = meta.cover; coverEl.style.display = "block"; }
+        else coverEl.style.display = "none";
+        renderBookChapters(window.SE_BOOKS[slug].chapters);
+    }).catch(function() {
+        listDiv.innerHTML = '<div class="empty-hint" style="padding:48px 0;text-align:center;color:#aeaeb2;">章节加载失败</div>';
+    });
+}
+
+// 按需加载某书 data.js，并把章节合并进全局 articles（供阅读/搜索复用）
+function loadBookData(slug) {
+    if (SE_LOADED[slug]) return Promise.resolve(SE_LOADED[slug]);
+    return fetch("se-books/" + slug + "/data.js")
+        .then(function(r) { return r.text(); })
+        .then(function(code) {
+            (new Function(code))();   // 执行后挂到 window.SE_BOOKS[slug]
+            var chapters = window.SE_BOOKS[slug].chapters;
+            for (var k in chapters) articles[k] = chapters[k];
+            SE_LOADED[slug] = chapters;
+            return chapters;
+        });
+}
+
+// 渲染书内章节列表
+function renderBookChapters(chapters) {
+    var listDiv = document.getElementById("bookChapterList");
+    var keys = Object.keys(chapters).sort(function(a, b) { return chapters[a].chapter - chapters[b].chapter; });
+    if (!keys.length) { listDiv.innerHTML = '<div class="empty-hint" style="padding:48px 0;text-align:center;color:#aeaeb2;">本书暂无章节</div>'; return; }
+
+    // 收集该书各章历史进度，找出最近在读章节（updatedAt 最新）
+    var progressMap = {};
+    var latestKey = null, latestTime = -1;
+    keys.forEach(function(k) {
+        var p = getSavedProgress(k);
+        if (p) {
+            progressMap[k] = p;
+            if (p.updatedAt > latestTime) { latestTime = p.updatedAt; latestKey = k; }
+        }
+    });
+
+    var html = "";
+    // 顶部"继续阅读"卡片：该书有历史记录时显示（重点入口）
+    if (latestKey && progressMap[latestKey]) {
+        var lp = progressMap[latestKey];
+        var lc = chapters[latestKey];
+        html += '<div class="continue-reading-card" onclick="openBookChapter(\'' + latestKey + '\')">' +
+            '<span class="cr-icon">▶</span>' +
+            '<div class="cr-info">' +
+                '<div class="cr-label">继续阅读</div>' +
+                '<div class="cr-title">' + escHtml(formatChapterTitle(lc.title)) + '</div>' +
+            '</div>' +
+            '<span class="cr-pct">已读 ' + lp.percent + '%</span>' +
+        '</div>';
+    }
+
+    html += keys.map(function(k) {
+        var c = chapters[k];
+        var words = c.wordCount || (c.text.match(/[A-Za-z]+(?:['’][A-Za-z]+)*/g) || []).length;
+        var mins = c.readingMinutes || Math.max(1, Math.round(words / 200));
+        var prog = progressMap[k];
+        var progHtml = prog ? '<span class="chapter-progress">' + prog.percent + '%</span>' : '';
+        var readingClass = (k === latestKey) ? ' reading' : '';
+        return '<div class="chapter-item' + readingClass + '" onclick="openBookChapter(\'' + k + '\')">' +
+            '<span class="chapter-num">' + pad2(c.chapter) + '</span>' +
+            '<div class="chapter-info">' +
+                '<div class="chapter-title">' + escHtml(formatChapterTitle(c.title)) + '</div>' +
+                '<div class="chapter-words">' + formatNum(words) + ' 词 · ' + mins + ' 分钟' + progHtml + '</div>' +
+            '</div>' +
+            '<span class="chapter-chevron">›</span>' +
+        '</div>';
+    }).join("");
+
+    listDiv.innerHTML = html;
+}
+
+// 打开书内某章：记录返回上下文后进入阅读器
+function openBookChapter(key) {
+    var a = articles[key];
+    if (!a) return;
+    libraryNav.book = a.book || null;
+    openArticle(key);
+}
+
+// 从书内章节视图返回书架
+function backToShelf() {
+    document.getElementById("bookChaptersView").style.display = "none";
+    document.getElementById("shelfView").style.display = "block";
+    renderShelf();
+}
+
 // 难度菱形（红色旋转45°正方形）
 function difficultyDiamonds(d) {
     if (!d || d < 1) return "";
@@ -573,6 +752,7 @@ function difficultyDiamonds(d) {
 // 显示文章列表
 function showArticleList(topic) {
     currentTopic = topic;
+    hideLibraryPanel();
     document.getElementById("articleListView").style.display = "block";
     document.getElementById("articleDetailView").style.display = "none";
     document.getElementById("textSettingsGroup").style.display = "none";
@@ -604,6 +784,12 @@ function openArticle(key) {
     currentArticleKey = key;
     document.getElementById("articleListView").style.display = "none";
     document.getElementById("articleDetailView").style.display = "block";
+    // 从图书馆进入文章：切换到 read 面板并隐藏图书馆
+    var libPanel = document.getElementById("library-panel");
+    if (libPanel && libPanel.style.display !== "none") {
+        document.getElementById("read-panel").style.display = "block";
+        libPanel.style.display = "none";
+    }
     document.getElementById("textSettingsGroup").style.display = "block";
     loadArticle(key);
     window.scrollTo(0, 0);
@@ -612,10 +798,20 @@ function openArticle(key) {
 // 返回列表
 function backToList() {
     ttsStop();
+    clearProgressTracking();
+    var fromBook = libraryNav.book;
+    libraryNav.book = null;
     var detail = document.getElementById("articleDetailView");
     detail.classList.add("slide-out");
     setTimeout(function() {
-        document.getElementById("articleListView").style.display = "block";
+        if (fromBook) {
+            // 从书内章节返回：回到该书章节列表
+            document.getElementById("library-panel").style.display = "block";
+            document.getElementById("bookChaptersView").style.display = "block";
+            document.getElementById("read-panel").style.display = "none";
+        } else {
+            document.getElementById("articleListView").style.display = "block";
+        }
         detail.style.display = "none";
         detail.classList.remove("slide-out");
         document.getElementById("textSettingsGroup").style.display = "none";
@@ -664,47 +860,178 @@ function splitSentences(text) {
     return result;
 }
 
+// 段落拆分：text 规范为段落间双空格分隔（import.js 数据格式）
+function splitParagraphs(text) {
+    return String(text).split(/ {2,}/).map(function(p) { return p.trim(); }).filter(Boolean);
+}
+
+// 渲染可点词文本：段落 → <p class="para" data-para>，段内句子 → .sentence，词 → .word
 function makeWordsClickable(container, text) {
     container.innerHTML = "";
     var knownWords = getWordBank().map(function(item) { return item.word.toLowerCase(); });
-    var sentences = splitSentences(text);
-    for (var si = 0; si < sentences.length; si++) {
-        var sentEl = document.createElement("span");
-        sentEl.className = "sentence";
-        container.appendChild(sentEl);
-        var tokens = sentences[si].split(/(\s+)/);
-        tokens.forEach(function(token) {
-            if (/^\s+$/.test(token)) { sentEl.appendChild(document.createTextNode(token)); return; }
-            // 支持英文缩写作为一个整体词（don't / it's / can't / shouldn't ...）
-            var match = token.match(/^([a-zA-Z]+(?:'[a-zA-Z]+)?)([.,;:!?)\]"']*)$/);
-            if (match) {
-                var word = match[1], punct = match[2];
-                var span = document.createElement("span");
-                span.className = "word";
-                span.textContent = word;
-                span.title = "点击查词";
-                // 用原型匹配：库里存 start，文章里的 starting/starts 也算已认识
-                if (knownWords.indexOf(getBaseWord(word)) !== -1) span.classList.add("known");
-                span.addEventListener("click", function(e) { e.stopPropagation(); lookupWord(word, span); });
-                sentEl.appendChild(span);
-                if (punct) sentEl.appendChild(document.createTextNode(punct));
-            } else { sentEl.appendChild(document.createTextNode(token)); }
-        });
-        if (si < sentences.length - 1) container.appendChild(document.createTextNode(" "));
+    var paragraphs = splitParagraphs(text);
+    for (var pi = 0; pi < paragraphs.length; pi++) {
+        var paraEl = document.createElement("p");
+        paraEl.className = "para";
+        paraEl.setAttribute("data-para", pi);
+        // 预存段落词数，供防突跃校验（Anti-Fling Guard）按 250wpm 判断进度合法性
+        paraEl.setAttribute("data-words", (paragraphs[pi].match(/[A-Za-z]+(?:['’][A-Za-z]+)*/g) || []).length);
+        container.appendChild(paraEl);
+        var sentences = splitSentences(paragraphs[pi]);
+        for (var si = 0; si < sentences.length; si++) {
+            var sentEl = document.createElement("span");
+            sentEl.className = "sentence";
+            paraEl.appendChild(sentEl);
+            var tokens = sentences[si].split(/(\s+)/);
+            tokens.forEach(function(token) {
+                if (/^\s+$/.test(token)) { sentEl.appendChild(document.createTextNode(token)); return; }
+                // 支持英文缩写作为一个整体词（don't / it's / can't / shouldn't ...）
+                var match = token.match(/^([a-zA-Z]+(?:'[a-zA-Z]+)?)([.,;:!?)\]"']*)$/);
+                if (match) {
+                    var word = match[1], punct = match[2];
+                    var span = document.createElement("span");
+                    span.className = "word";
+                    span.textContent = word;
+                    span.title = "点击查词";
+                    // 用原型匹配：库里存 start，文章里的 starting/starts 也算已认识
+                    if (knownWords.indexOf(getBaseWord(word)) !== -1) span.classList.add("known");
+                    span.addEventListener("click", function(e) { e.stopPropagation(); lookupWord(word, span); });
+                    sentEl.appendChild(span);
+                    if (punct) sentEl.appendChild(document.createTextNode(punct));
+                } else { sentEl.appendChild(document.createTextNode(token)); }
+            });
+            if (si < sentences.length - 1) paraEl.appendChild(document.createTextNode(" "));
+        }
     }
+}
+
+// ==========================================
+// 阅读进度记忆（段落级定位 + 继续阅读）
+// ==========================================
+function getSavedProgress(chapterId) {
+    try {
+        var raw = localStorage.getItem(PROGRESS_PREFIX + chapterId);
+        return raw ? JSON.parse(raw) : null;
+    } catch (e) { return null; }
+}
+
+function getParas() {
+    return document.querySelectorAll("#articleContent .para");
+}
+
+// 两段落之间的累计词数（不含 from 端，含 to 端）
+function wordsBetween(fromIdx, toIdx) {
+    var paras = getParas();
+    if (!paras.length) return 0;
+    var lo = Math.min(fromIdx, toIdx), hi = Math.max(fromIdx, toIdx);
+    var w = 0;
+    for (var i = lo + 1; i <= hi; i++) {
+        if (paras[i]) w += parseInt(paras[i].getAttribute("data-words") || "0", 10) || 0;
+    }
+    return w;
+}
+
+// 防突跃校验（Anti-Fling Guard）：相对上次保存位置的新增词数，必须在经过时间内按 250wpm 能读完
+function shouldAcceptProgress(newPara) {
+    if (readProgress.savedPara < 0 || newPara === readProgress.savedPara) return true;
+    var deltaWords = wordsBetween(readProgress.savedPara, newPara);
+    var elapsedMin = (Date.now() - readProgress.savedAt) / 60000;
+    var canReadWords = elapsedMin * 250;   // 250 wpm 正常阅读速度
+    return deltaWords <= canReadWords;
+}
+
+function saveProgressNow(chapterId, paraIndex, totalParas) {
+    if (!chapterId || !totalParas) return;
+    var percent = Math.min(100, Math.round((paraIndex + 1) / totalParas * 100));
+    var data = { chapterId: chapterId, paragraphIndex: paraIndex, percent: percent, updatedAt: Date.now() };
+    try { localStorage.setItem(PROGRESS_PREFIX + chapterId, JSON.stringify(data)); } catch (e) {}
+    readProgress.percent = percent;
+    readProgress.savedPara = paraIndex;
+    readProgress.savedAt = Date.now();
+}
+
+// 驻留时间过滤（Dwell Time）：段落变化后重置计时，停止滚动且在同一段落停留 ≥2.5s 才尝试保存；
+// 保存前再过防突跃校验，快速划过（fling）不会错误覆盖真实进度
+function scheduleProgressSave() {
+    if (readProgress.timer) clearTimeout(readProgress.timer);
+    readProgress.timer = setTimeout(function() {
+        var paras = getParas();
+        if (!paras.length || !currentArticleKey) return;
+        if (!shouldAcceptProgress(readProgress.para)) return;  // 快速扫视，禁止更新
+        saveProgressNow(currentArticleKey, readProgress.para, paras.length);
+    }, 2500);
+}
+
+// IntersectionObserver：监听视口顶部可见段落（rootMargin 收窄到顶部 30%），段落变化即防抖保存
+function setupProgressObserver() {
+    if (readProgress.observer) { readProgress.observer.disconnect(); readProgress.observer = null; }
+    var paras = document.querySelectorAll("#articleContent .para");
+    if (!paras.length) return;
+    readProgress.para = 0;
+    var io = new IntersectionObserver(function(entries) {
+        var bestTop = Infinity, bestIdx = -1;
+        for (var i = 0; i < entries.length; i++) {
+            var entry = entries[i];
+            if (!entry.isIntersecting) continue;
+            var top = entry.boundingClientRect.top;
+            if (top >= -16 && top < bestTop) { bestTop = top; bestIdx = parseInt(entry.target.getAttribute("data-para"), 10); }
+        }
+        if (bestIdx >= 0 && bestIdx !== readProgress.para) {
+            readProgress.para = bestIdx;
+            scheduleProgressSave();
+        }
+    }, { rootMargin: "0px 0px -70% 0px", threshold: 0 });
+    paras.forEach(function(p) { io.observe(p); });
+    readProgress.observer = io;
+}
+
+// 进入章节：平滑滚动到上次段落并 Toast 提示
+function tryRestoreProgress() {
+    var saved = getSavedProgress(currentArticleKey);
+    var paras = document.querySelectorAll("#articleContent .para");
+    if (!saved || !paras.length || saved.paragraphIndex >= paras.length) return;
+    readProgress.para = saved.paragraphIndex;
+    // 等布局稳定（图片/字体）后再滚动
+    setTimeout(function() {
+        var p = document.querySelectorAll("#articleContent .para")[saved.paragraphIndex];
+        if (!p) return;
+        p.scrollIntoView({ behavior: "smooth", block: "start" });
+        showToast("已恢复至上次阅读位置");
+    }, 150);
+}
+
+// 轻量 Toast：顶部居中，2.2s 自动淡出
+function showToast(msg) {
+    var t = document.getElementById("gapToast");
+    if (!t) {
+        t = document.createElement("div");
+        t.id = "gapToast";
+        t.className = "toast";
+        document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(t._timer);
+    t._timer = setTimeout(function() { t.classList.remove("show"); }, 2200);
+}
+
+// 退出阅读时停止观察与定时器
+function clearProgressTracking() {
+    if (readProgress.timer) { clearTimeout(readProgress.timer); readProgress.timer = null; }
+    if (readProgress.observer) { readProgress.observer.disconnect(); readProgress.observer = null; }
 }
 
 function loadArticle(key) {
     var article = articles[key];
     if (!article) return;
     currentArticleKey = key;
-    currentTopic = key.split("-")[0];
+    if (!article.book) currentTopic = key.split("-")[0];
     var detailView = document.getElementById("articleDetailView");
     detailView.classList.remove("show", "slide-out");
     // Force reflow then add show class for animation
     void detailView.offsetWidth;
     detailView.classList.add("show");
-    makeWordsClickable(document.getElementById("articleTitle"), article.title);
+    makeWordsClickable(document.getElementById("articleTitle"), formatChapterTitle(article.title));
     document.getElementById("articleDifficulty").innerHTML = difficultyDiamonds(article.difficulty);
     var titleCnEl = document.getElementById("articleTitleCn");
     if (article.titleCn) {
@@ -742,7 +1069,17 @@ function loadArticle(key) {
         capEl.style.display = "none";
     }
     makeWordsClickable(document.getElementById("articleContent"), article.text);
+    // 初始化进度基准：有历史记录以历史段落为基准，否则以开头为基准 —— 防快速划过误报
+    var _saved = getSavedProgress(key);
+    readProgress.para = 0;
+    readProgress.savedPara = (_saved && _saved.paragraphIndex !== undefined) ? _saved.paragraphIndex : 0;
+    readProgress.savedAt = Date.now();
+    setupProgressObserver();
+    tryRestoreProgress();
     applyDisplaySettings();
+    // 图书馆的书不提供 TTS 朗读（不配音）：隐藏朗读按钮；话题文章不受影响
+    var ttsBtn = document.getElementById("ttsArticleBtn");
+    if (ttsBtn) ttsBtn.style.display = article.book ? "none" : "";
     ttsOnArticleLoad();
 }
 
@@ -798,7 +1135,7 @@ function searchArticles(query) {
                 titleCn: a.titleCn || "",
                 text: a.text,
                 source: a.source || "",
-                topic: TOPIC_NAMES[topicKey] || "",
+                topic: a.book ? "图书馆" : (TOPIC_NAMES[topicKey] || ""),
                 difficulty: a.difficulty || 0,
                 score: inTitle ? 2 : 1
             });
@@ -819,7 +1156,7 @@ function renderSearchResults(results) {
         if (preview.length > 150) preview = preview.slice(0, 150) + "...";
         return '<div class="article-list-item" onclick="openArticle(\'' + r.key + '\')">' +
             '<div class="ali-title-row">' +
-            '<div class="ali-title">' + r.title + '</div>' +
+            '<div class="ali-title">' + formatChapterTitle(r.title) + '</div>' +
             difficultyDiamonds(r.difficulty) +
             '</div>' +
             (r.titleCn ? '<div class="ali-title-cn">' + r.titleCn + '</div>' : '') +
