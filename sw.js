@@ -1,5 +1,5 @@
 // Gap Service Worker - 离线缓存
-var CACHE = "gap-v29";
+var CACHE = "gap-v30";
 var FILES = [
     "/",
     "/index.html",
@@ -63,9 +63,22 @@ self.addEventListener("fetch", function(e) {
         return;
     }
 
-    // se-books 数据（catalog / data.js）：Stale-While-Revalidate —— 先返回缓存（快 + 离线可用），
-    // 后台拉取新版本更新缓存，保证重新导入后数据能自动刷新
+    // se-books 数据
     if (e.request.url.indexOf("/se-books/") !== -1) {
+        // se-catalog.json 是书架索引：网络优先保证新增书立即可见（离线才回退缓存）
+        if (e.request.url.indexOf("se-catalog.json") !== -1) {
+            e.respondWith(
+                fetch(e.request).then(function(response) {
+                    if (response.ok) {
+                        var clone = response.clone();
+                        caches.open(CACHE).then(function(cache) { cache.put(e.request, clone); });
+                    }
+                    return response;
+                }).catch(function() { return caches.match(e.request); })
+            );
+            return;
+        }
+        // data.js 等书数据：Stale-While-Revalidate，先返回缓存（快 + 离线可用），后台更新
         e.respondWith(
             caches.match(e.request).then(function(cached) {
                 var network = fetch(e.request).then(function(response) {

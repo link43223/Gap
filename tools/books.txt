@@ -11,3 +11,17 @@ https://standardebooks.org/ebooks/charlotte-bronte/jane-eyre
 https://standardebooks.org/ebooks/alexandre-dumas/the-count-of-monte-cristo
 https://standardebooks.org/ebooks/emily-bronte/wuthering-heights
 https://standardebooks.org/ebooks/h-g-wells/the-time-machine
+https://standardebooks.org/ebooks/mary-shelley/frankenstein
+https://standardebooks.org/ebooks/arthur-conan-doyle/the-adventures-of-sherlock-holmes
+https://standardebooks.org/ebooks/oscar-wilde/the-picture-of-dorian-gray
+https://standardebooks.org/ebooks/f-scott-fitzgerald/the-great-gatsby
+https://standardebooks.org/ebooks/george-orwell/animal-farm
+https://standardebooks.org/ebooks/george-orwell/nineteen-eighty-four
+https://standardebooks.org/ebooks/l-frank-baum/the-wonderful-wizard-of-oz
+https://standardebooks.org/ebooks/jules-verne/around-the-world-in-eighty-days
+https://standardebooks.org/ebooks/jules-verne/twenty-thousand-leagues-under-the-seas
+https://standardebooks.org/ebooks/victor-hugo/les-miserables
+https://standardebooks.org/ebooks/victor-hugo/notre-dame-de-paris
+https://standardebooks.org/ebooks/fyodor-dostoevsky/crime-and-punishment
+https://standardebooks.org/ebooks/leo-tolstoy/anna-karenina
+https://standardebooks.org/ebooks/mark-twain/the-adventures-of-tom-sawyer

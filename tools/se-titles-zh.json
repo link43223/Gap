@@ -22,5 +22,61 @@
   "the-time-machine": {
     "titleCn": "时间机器",
     "originalYear": 1895
+  },
+  "frankenstein": {
+    "titleCn": "弗兰肯斯坦",
+    "originalYear": 1818
+  },
+  "the-adventures-of-sherlock-holmes": {
+    "titleCn": "福尔摩斯探案集",
+    "originalYear": 1892
+  },
+  "the-picture-of-dorian-gray": {
+    "titleCn": "道林·格雷的画像",
+    "originalYear": 1890
+  },
+  "the-great-gatsby": {
+    "titleCn": "了不起的盖茨比",
+    "originalYear": 1925
+  },
+  "animal-farm": {
+    "titleCn": "动物农场",
+    "originalYear": 1945
+  },
+  "nineteen-eighty-four": {
+    "titleCn": "1984",
+    "originalYear": 1949
+  },
+  "the-wonderful-wizard-of-oz": {
+    "titleCn": "绿野仙踪",
+    "originalYear": 1900
+  },
+  "around-the-world-in-eighty-days": {
+    "titleCn": "八十天环游地球",
+    "originalYear": 1872
+  },
+  "twenty-thousand-leagues-under-the-seas": {
+    "titleCn": "海底两万里",
+    "originalYear": 1870
+  },
+  "les-miserables": {
+    "titleCn": "悲惨世界",
+    "originalYear": 1862
+  },
+  "notre-dame-de-paris": {
+    "titleCn": "巴黎圣母院",
+    "originalYear": 1831
+  },
+  "crime-and-punishment": {
+    "titleCn": "罪与罚",
+    "originalYear": 1866
+  },
+  "anna-karenina": {
+    "titleCn": "安娜·卡列尼娜",
+    "originalYear": 1878
+  },
+  "the-adventures-of-tom-sawyer": {
+    "titleCn": "汤姆·索亚历险记",
+    "originalYear": 1876
   }
 }

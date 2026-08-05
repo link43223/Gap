@@ -1,0 +1,4 @@
+/* 134. Book
+VI — 清洗后纯文本（供人工校对 / TTS 续跑） */
+
+Le Petit-Picpus

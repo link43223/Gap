@@ -223,7 +223,8 @@ function run(cmd, args, opts) {
 }
 
 function downloadZip(url, outPath) {
-    run('curl', ['-sL', '-f', '-o', outPath, url]);
+    // GitHub 大 zip 偶发传输失败，curl 自动重试 3 次
+    run('curl', ['-sL', '-f', '--retry', '3', '--retry-delay', '2', '-o', outPath, url]);
 }
 
 // 从 SE 书页解析真实 GitHub 仓库名（SE 部分书含版本后缀，如 the-count-of-monte-cristo_chapman-and-hall）
